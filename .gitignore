@@ -1,0 +1,12 @@
+# idea ignore
+.idea/
+/idea/
+
+# python
+__pycache__
+
+*.pyc
+
+#system ignore
+*.DS_Store
+Thumbs.db

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div class="col-md-6 col-md-offset-3">
+        <h5 style="text-align: center">导入工程</h5>
+        <form method="post" action="{% url 'projects:new_project' %}"  >
+            {{ project_form  }}
+            {% csrf_token %}
+            <input class="btn btn-green"  type="submit" value="Submit" />
+        </form>
+    </div>
+</body>
+</html>
