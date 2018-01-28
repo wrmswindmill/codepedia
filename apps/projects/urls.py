@@ -15,9 +15,12 @@ Including another URLconf
 """
 
 from django.urls import path
-from .views import NewProjectView
+from .views import NewProjectView, ProjectListView, ProjectInfoView, ProjectSourceView
 
 app_name = "projects"
 urlpatterns = [
-    path('new/', NewProjectView.as_view(), name='new_project')
+    path('new/', NewProjectView.as_view(), name='new_project'),
+    path('list/', ProjectListView.as_view(), name='list'),
+    path('<slug:name>/', ProjectInfoView.as_view(), name='info'),
+    path('<slug:name>/xref<path:path>', ProjectSourceView.as_view(), name='source')
 ]

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div class="new_login_form">
+        <form id="email_register_form" method="post" action="{% url 'users:login' %}" autocomplete="off">
+            <ul>
+                <li class="new_register_li form-group {% if login_form.errors.email %}errorput{% endif %}">
+                    <input type="text" class="new_register_input" id="id_email" name="username" value="{{ login_form.email.value }}" placeholder="请输入您的邮箱地址或用户名">
+                </li>
+                <li class="new_register_li form-group {% if login_form.errors.password %} errorput{% endif %}">
+                    <input type="password" class="new_register_input"  id="id_password" name="password"  value="{{ login_form.password1.value }}" placeholder="请输入6-20位非中文字符密码" />
+                </li>
+            </ul>
+                <div class="error btns" id="jsEmailTips">{% for key,error in login_form.errors.items %}{{ error }}{% endfor %}{{ msg }}</div>
+            <div class="auto-box marb8"></div>
+            <input class="btn btn-green new_login_submit" id="jsEmailRegBtn" type="submit" value="登录" />
+            {% csrf_token %}
+        </form>
+    </div>
+</body>
+</html>

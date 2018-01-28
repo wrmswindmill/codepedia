@@ -13,21 +13,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
-import xadmin
-import debug_toolbar
 
-from users.views import IndexView
+from django.urls import path
+from .views import LoginView, LogoutView
 
+app_name = "users"
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('xadmin/', xadmin.site.urls),
-    path('', IndexView.as_view(), name="index"),
-    path('projects/', include('projects.urls', namespace='projects')),
-    path('operations/', include('operations.urls', namespace='operations')),
-    path('users/', include('users.urls', namespace='users')),
-    # 第三方登陆
-    path('accounts/', include('allauth.urls')),
-    path('__debug__/', include(debug_toolbar.urls)),
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
+
 ]

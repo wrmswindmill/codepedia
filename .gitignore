@@ -2,6 +2,10 @@
 .idea/
 /idea/
 
+log/
+/log/
+
+
 # python
 __pycache__
 
