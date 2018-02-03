@@ -1,8 +1,0 @@
-.idea
-.gradle
-.DS_Store
-*.iml
-build
-dist
-out/
-src/jflex/java
