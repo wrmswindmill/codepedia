@@ -5,13 +5,13 @@ MyOpenGrok是基于[OpenGrok](http://oracle.github.io/opengrok/)的源代码搜�
 
 ## Requirement
 
-#### 1.安装opengrok：
+### 1.安装opengrok：
 具体可以参照：http://blog.csdn.net/jeffyin_wh/article/details/21465323
 
-#### 2.验证是否安装成功：
+### 2.验证是否安装成功：
 启动tomcat，在浏览器访问：http://localhost:8080/source ，如果展示了下面的页面，就说明安装成功了。
-
-#### 3.使用opengrok对项目建立索引
+![](opengrok.png)
+### 3.使用opengrok对项目建立索引
 
 **注意:如果想要对某个项目使用MyOpengrok的功能,首先必须对这个项目建立索引!!,如果新添加了一个项目,记得一定要对这个项目建立索引!!!**
 
@@ -32,11 +32,11 @@ java -Xmx524m -jar lib/opengrok.jar -W "<opengrok-home>/data/configuration.xml" 
 ```
 
 ## Usage
-#### 1.获取项目中文件的内容：
+### 1.获取项目中文件的内容：
 
 在opengrok中,如果想要查看code-reading/src/main/java/com/codeReading/config/ElasticsearchConfig.java文件的内容,可以通过访问:http://localhost:8080/xref/code-reading/src/main/java/com/codeReading/config/ElasticsearchConfig.java, 而MyOpengrok既保留了这种访问方式,而且,**如果只想获取文件的内容,可以将上面url中的xref替换为myxref即可.**
 
-#### 2.获取文件的navigation内容
+### 2.获取文件的navigation内容
 
 首先所谓的navigation也就是文件的一些重要的内容,由三个部分组成:class,package,method,如果我想获取code-reading/src/main/java/com/codeReading/config/ElasticsearchConfig.java文件的Navigation的内容,可以通过访问:http://localhost:8080/navigation/code-reading/src/main/java/com/codeReading/config/ElasticsearchConfig.java ,(其实跟上面的方式类似,只是将xref替换为了navigation而已),**返回值如下所示:**
 
@@ -46,7 +46,7 @@ java -Xmx524m -jar lib/opengrok.jar -W "<opengrok-home>/data/configuration.xml" 
 
 返回值的意思就是文件的Class名为ElasticsearchConfig,在文件的第19行,第二个参数"xc"一般用不上,(它是opengrok中html中的class属性).
 
-#### 3.按关键字搜索
+### 3.按关键字搜索
 
 在opengrok中,搜索可以如果想要只在jdk1.8这个项目下搜索defs=Date的项,可以在浏览器访问:
 

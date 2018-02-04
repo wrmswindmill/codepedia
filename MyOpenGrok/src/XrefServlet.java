@@ -36,6 +36,8 @@ public class XrefServlet extends HttpServlet {
         resp.getOutputStream().write(("</code></pre>").getBytes("utf-8"));
     }
 
+    //该方法获取文件对应的代码段区域(html格式的代码)
+    //实际上文件就储存在<opengrok-homedir>/data/下面
     public String getFileContent(String head,HttpServletRequest req){
         String uri=req.getRequestURI();
         uri=uri.replace("myxref","xref");
@@ -65,11 +67,12 @@ public class XrefServlet extends HttpServlet {
     }
 
 
-    //对调用opengrok获取的html内容进行修改,变为codepedia处理的html
+    //对调用opengrok获取的html内容进行修改,变为符合codepedia需求的html
     public String dealContent(String html){
-        //jsoup会有bug,这两行是相对应的处理代码
-        html=html.replaceAll("\n","x78fa12@!");
-        html=html.replaceAll("\t","x78fa13@!");
+        //jsoup会有bug,会将\t以及\n的html代码处理
+        //这两行是相对应的处理代码,首先将原html中的\n和\t转义,处理完之后再转义回来
+        html=html.replaceAll("\n","x78!f");
+        html=html.replaceAll("\t","c82d@");
 
         //修改的內容只针对<a>标签
         Document doc = Jsoup.parse(html);
@@ -85,7 +88,7 @@ public class XrefServlet extends HttpServlet {
             i++;
         }
 
-        return doc.html().replaceAll("x78fa12@!","\n").replaceAll("x78fa13@!","\t");
+        return doc.html().replaceAll("x78!f","\n").replaceAll("c82d@","\t");
     }
 
 

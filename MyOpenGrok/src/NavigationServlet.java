@@ -11,6 +11,7 @@ import java.io.IOException;
 
 
 public class NavigationServlet extends HttpServlet {
+    //获取文件的
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)  throws ServletException, IOException {
         String out="";
         try{

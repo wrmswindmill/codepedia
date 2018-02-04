@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class Navigation {
-
+    //这个文件中的代码是从opengrok中提取出的,用来生成Navigation的代码
     public String writeSymbolTable(Definitions defs) throws IOException {
         if (defs == null) {
             // No definitions, no symbol table to write
