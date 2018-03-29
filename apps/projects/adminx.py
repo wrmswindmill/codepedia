@@ -3,12 +3,8 @@ import xadmin
 
 from .models import Language, Project, File
 
-
-
-
 class LanguageAdmin(object):
     pass
-
 
 class ProjectAdmin(object):
     pass

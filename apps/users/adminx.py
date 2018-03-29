@@ -32,5 +32,5 @@ class UserAdmin(object):
 xadmin.site.register(views.BaseAdminView, BaseSetting)
 xadmin.site.register(views.CommAdminView, GlobalSettings)
 xadmin.site.register(School, SchoolAdmin)
-xadmin.site.register(User, UserAdmin)
+#xadmin.site.register(User, UserAdmin)
 xadmin.site.register(Grade, GradeAdmin)

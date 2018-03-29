@@ -53,12 +53,13 @@ def getFileMTime(project_name, path):
 
 @register.simple_tag()
 def formatText2Line(project_path, file_path):
-    url = 'http://localhost:8080/myservlet/'
+    url = 'http://localhost:8080/myopengrok/myxref/'
     request_url = url + str(project_path) + file_path
     response = requests.get(request_url)
     lines = {}
     for index, line in enumerate(response.text.split('\n')):
         lines[str(index + 1)] = line
+    print(lines)
     return lines
 
 

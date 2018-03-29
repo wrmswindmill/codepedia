@@ -113,7 +113,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'codepedia',
         'USER': 'root',
-        'PASSWORD': '111111',
+        'PASSWORD': 'root123',
         'HOST': '127.0.0.1'
     }
 }
@@ -203,7 +203,7 @@ INTERNAL_IPS = ('127.0.0.1', )
 
 
 # 工程路径
-SOURCEPATH = '/Users/yujie/workspace/opengrok/source/'
+SOURCEPATH = '/opt/opengrok/source/'
 
 # # logging日志配置
 # LOGGING = {
