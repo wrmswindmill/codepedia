@@ -205,6 +205,12 @@ INTERNAL_IPS = ('127.0.0.1', )
 # 工程路径
 SOURCEPATH = '/opt/opengrok/source/'
 
+# OpenGrok
+OPENGROK_BASE = 'http://localhost:8080/myopengrok/'
+OPENGROK_XREF_URL = OPENGROK_BASE+'myxref/'
+OPENGROK_NAVIGATION_URL = OPENGROK_BASE+'navigation/'
+OPENGROK_SEARCH_URL = OPENGROK_BASE+'mysearch?'
+
 # # logging日志配置
 # LOGGING = {
 #     'version': 1,

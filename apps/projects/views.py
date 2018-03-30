@@ -68,21 +68,26 @@ class ProjectSourceView(View):
         # 判断当前文件是否是文件夹
         # 获取目录
         path = file.path.split('/')
+        print(path)
         path_dict = {}
         for i in range(1, len(path)):
             path_dict[path[i]] = '/'.join(path[:i + 1])
             # path_dict[path[i]] = 'projects/'+project.path+'/xref/'.join(path[:i + 1])
-        print(path_dict)
+
+        #file.type=1 means it's a dir
+        #file.type=0 means it's a file
         if file.type == '1':
+            # get all files in current dir
             files = File.objects.filter(super_path=file, project=project)
-            # 取出每个文件或文件夹的的注释
             annos_count = {}
             for file in files:
                 # 取出每个文件的注释数量
                 anno_count = Annotation.objects.filter(file=file).count()
+                print("%s:%i"%(file.name,anno_count))
                 if anno_count > 0:
                     annos_count[file.name] = str(anno_count)
             return render(request, 'projects/directory.html', locals())
+        
         else:
             # 按linenum取出注释数目 返回结果是 <QuerySet [{'linenum': 0, 'nums': 1}, {'linenum': 1, 'nums': 2}, {'linenum': 2, 'nums': 2}]>
             # 因此需要进行一个转化

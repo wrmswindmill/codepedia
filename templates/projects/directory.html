@@ -1,4 +1,3 @@
-
 {% load base_filter %}
 <!DOCTYPE html>
 <html lang="en">
@@ -7,9 +6,9 @@
     <title>Title</title>
     <script src="http://apps.bdimg.com/libs/jquery/1.11.1/jquery.min.js"></script>
     <script type="application/javascript">
-{#        $.ajaxSetup({#}
-{#                data: {csrfmiddlewaretoken: '{{ csrf_token }}' },#}
-{#            });#}
+// {#        $.ajaxSetup({#}
+// {#                data: {csrfmiddlewaretoken: '{{ csrf_token }}' },#}
+// {#            });#}
         function show_annotation(file_id, line_num) {
             $.ajax({
               cache:false,
@@ -18,28 +17,31 @@
               data:{'file_id': file_id, 'line_num': line_num, 'csrfmiddlewaretoken':'{{ csrf_token }}'},
               dataType: 'json',
               async: true,
-{#              beforeSend:function(xhr, settings){#}
-{#                xhr.setRequestHeader("X-CSRFToken", {% csrf_token %});#}
-{#              },#}
+// {#              beforeSend:function(xhr, settings){#}
+// {#                xhr.setRequestHeader("X-CSRFToken", {% csrf_token %});#}
+// {#              },#}
               success:function (data) {
                   $('#annotation').html(data.msg);
                    console.log(data.msg);
-
           }
           });
         }
     </script>
 </head>
 <body>
+
+    {%include 'projects/project-info.html'   %}
+    当前目录:
     {% for rel_path,abs_path in path_dict.items %}
         /<a href="{% url  'projects:source' project.name abs_path %}">{{ rel_path }}</a>
     {% endfor %}
     <br>
     {% for file in files %}
-        <a href="{% url 'projects:source' project.name file.path %}">{{ file.name }}</a>    {{ project.path|getFileSize:file.path|filesizeformat }} {{ project.path|getfileCTime:file.path }}   {{ project.path|getFileMTime:file.path }}
+        <a href="{% url 'projects:source' project.name file.path %}">{{ file.name }}</a>    
+        <!-- {{ project.path|getFileSize:file.path|filesizeformat }} {{ project.path|getfileCTime:file.path }}   {{ project.path|getFileMTime:file.path }} -->
         {# 取出每个文件的注释数量#}
         {% if file.name in annos_count %}
-            <div onclick="show_annotation({{ file.id }},0)">{{ annos_count|keyValue:file.name }}</div>
+            <a href="#" onclick="show_annotation({{ file.id }},0)">注释数目:{{ annos_count|keyValue:file.name }}</a>
         {% endif %}
         <br>
     {% endfor %}

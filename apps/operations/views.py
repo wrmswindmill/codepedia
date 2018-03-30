@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 from django.http import HttpResponse
+from django.conf import settings
 
 import json
 import requests
@@ -45,22 +46,35 @@ class ShowQuestionView(View):
 
 class ShowNavigationView(View):
     """
-       获取代码文件里面的所有定义
+       获取当前文件的Structure，也就是Package,Class，Method信息。
     """
     def post(self, request):
-        navigation_url = 'http://localhost:8080/navigation/'
+        navigation_url = settings.OPENGROK_NAVIGATION_URL
         project_path = request.POST.get('project_path', '')
         file_path = request.POST.get('file_path', '')
         navigation_url = navigation_url +project_path + file_path
         response = requests.get(navigation_url).text
+        
+        #deal response
+        response = response.replace("]],[","]]|[")
         if response:
             all_symbols = []
-            for symbol in response.split('|'):
+            for symbol in response.split("|"):
                 symbol = json.loads(symbol)
+                del symbol[1]
                 all_symbols.append(symbol)
+            print(all_symbols)
             return HttpResponse(json.dumps({"status": "success", "msg": all_symbols}), content_type='application/json')
         else:
             return HttpResponse(json.dumps({"status": "failed", "msg": 'null'}), content_type='application/json')
+
+class ShowMethodInfo(View):
+    """
+        获取当前方法的具体信息
+    """
+    pass
+    # def post(self ,request):
+    #     search_url = settings.
 
 
 class AddAnnotationView(View):
