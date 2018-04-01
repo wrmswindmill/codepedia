@@ -1,0 +1,144 @@
+
+.postcell{
+  float: left;
+  width:765px;
+  vertical-align: top;
+}
+
+.qtip .question  .postcell{
+  width:650px;
+}
+.post-text .questionblock{
+  width: 100%;
+}
+
+.postcell .post-text{
+  width: 100%;
+  margin-bottom:5px;
+  word-wrap: break-word;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.post-text .blockquote{
+ width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-left: 2px solid #ffeb8e;
+}
+
+.snippet-code{
+  height:auto;
+  width: 770px;
+  margin-bottom: 5px;
+  background-color: #ffffff;
+       border: 1px  solid #e9e9e9;
+
+}
+
+.snippet-code-linenum{
+  float: left;
+  width:40px;
+  background-color: #f1efec;
+}
+
+.snippet-code-line{
+  float:left;
+  height: 100%;
+  width: 640px;
+  background-color: #ffffff;
+  overflow-x: auto;
+  overflow-y: hidden;
+    margin-right: 5px;
+}
+
+.snippet-code-addannotation{
+  float:left;
+  width: 80px;
+       border-left: 1px  solid #e9e9e9;
+
+}
+
+
+pre.prettyprint{
+  background-color: #ffffff;
+  border-radius: 0;
+  padding: 0 2px 0 2px;
+  height:20px;
+  overflow-x:hidden;
+  min-width: 645px;
+  margin: 0;
+  border: 0;
+  display: inline-block;
+  float: left;
+}
+
+pre.prettyprint span{
+  display: inline-block;
+}
+
+.annotations-count{
+    width:30px;
+  border-radius: 5px;
+  color: #9e9b9b;
+  border:1px;
+  font-weight: normal;
+    display: inline-block;
+    float: left;
+}
+
+.annotation-num {
+  background-image: url(../../image/annotation.png);
+  background-repeat: no-repeat;
+  background-size: 100%;
+  width: 26px;
+  height: 16px;
+  margin: 2px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 19px;
+  color: #1688fa;
+  vertical-align: middle;
+}
+
+.line-annotation{
+  font-size: 15px;
+    width:80px;
+  height: 20px;
+  background-color: #ffffff;
+}
+
+.line_question{
+    float: left;
+    vertical-align: top;
+     width: 30px;
+    height:20px;
+}
+.question_img{
+  background-image: url(../../image/question.png);
+  background-repeat:  no-repeat;
+  background-size:100%;
+  height: 16px;
+  margin: 2px;
+}
+
+.add_line_annotation{
+    float: right;
+    height: 16px;
+   width:16px;
+  margin: 2px;
+
+
+}
+
+.add_anno_img{
+    height: 16px;
+    vertical-align:top;
+}
+
+
+.qtip { max-width: none !important; }
+
+ .line_question_detail #question .question .postcell{
+  width: 680px;
+}

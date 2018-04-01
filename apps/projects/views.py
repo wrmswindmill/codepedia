@@ -47,6 +47,16 @@ class NewProjectView(View):
 class ProjectListView(View):
     def get(self, request):
         all_projects = Project.objects.all()
+        # 工程排序
+        sort = request.GET.get('sort', '')
+        if sort:
+            if sort == '':
+                all_projects = all_projects.order_by('-created')
+            elif sort == 'hot':
+                all_projects = all_projects.order_by('-views')
+        # return render(request, 'projects/project_list.html', {'all_projects': all_projects,
+        #                                                       'sort': sort,
+        #                                                       })
         return render(request, 'projects/list.html', locals())
 
 

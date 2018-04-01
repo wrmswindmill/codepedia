@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+{% extends 'shared/base.html' %} 
+{% load staticfiles %} 
+{% block title %} CodePedia-工程列表 {% endblock %} 
 
-<body>
-    {% for project in all_projects %}
-        <a href=""></a> {{ project.name|title }}
-    {% endfor %}
-</body>
-</html>
+{% block content%}
+<div class="container">
+    <div id="content" class="snippet-hidden">
+        {% include 'projects/main/mainbar.html' %} 
+    </div>
+</div>
+{% endblock %}

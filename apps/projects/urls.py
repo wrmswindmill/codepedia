@@ -19,8 +19,8 @@ from .views import NewProjectView, ProjectListView, ProjectInfoView, ProjectSour
 
 app_name = "projects"
 urlpatterns = [
+    path('', ProjectListView.as_view(), name='list'),
     path('new/', NewProjectView.as_view(), name='new_project'),
-    path('list/', ProjectListView.as_view(), name='list'),
     path('<slug:name>/', ProjectInfoView.as_view(), name='info'),
     path('<slug:name>/xref<path:path>', ProjectSourceView.as_view(), name='source')
 ]

@@ -4,8 +4,9 @@ Django 详细文档：https://docs.djangoproject.com/en/2.0/
 #### 把项目现在本地跑起来   
 1.  在本地配置好所需要的package：
 
-(1)生成requirements.txt文件(失败了...)
-(2)然后安装对应的模块：
+(1)然后安装对应的模块：
+因为pip库中有些三个包找不到，所以事先将这几个包下载好。详情见补充
+然后执行：
 ```shell
 pip install -r requirements.txt
 ```
@@ -55,9 +56,6 @@ def index(request):
     return render(request, 'polls/index.html', context)
 ```
 
-各文件夹的作用
-
-
 
 ### 补充
 
@@ -75,17 +73,16 @@ pip install git+git://github.com/sshwsfc/xadmin.git@django2
 点击右边的“Clone or download”绿色按钮，选择“Download ZIP”,下载zip包到本地；
 执行以下命令安装：
 ```
-pip install --cache-dir . d:\xadmin-django2.zip(请自行替换)
+wget https://github.com/sshwsfc/xadmin/archive/django2.zip
+pip install --cache-dir . django2.zip
+rm django2.zip
 ```
 #### 安装django-suit==2.0a1
 ```
 pip install https://github.com/darklow/django-suit/tarball/v2
 ```
 #### 安装mysql-client:
-
-
-3.和蔡世交互，也就是提供她一些数据，或者说两人协同开发这个平台
-（1）怎么把数据传到前台
-（2）数据怎么获取
+apt-get install libmysqlclient-dev
+pip install mysqlclient==1.3.12
 
 

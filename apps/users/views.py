@@ -8,13 +8,12 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-
 import json
 import requests
 
 
 from .models import User
-from .forms import LoginForm
+from .forms import LoginForm,RegisterForm
 
 
 # Create your views here.
@@ -48,6 +47,42 @@ class LoginView(View):
                 return render(request, 'users/login.html', {'msg': '用户名或密码错误!'})
         else:
             return render(request, 'users/login.html', {'login_form': login_form})
+
+
+class RegisterView(View):
+
+    def get(self, request):
+        return render(request, 'users/register.html', None)
+
+    def post(self, request):
+        register_form = RegisterForm(request.POST)       
+        if register_form.is_valid():
+            user_name = request.POST.get('email', '')
+            if User.objects.filter(email=user_name):
+                return render(request, 'users/register.html', {
+                    'register_form': register_form,
+                    'msg': '用户已经存在'
+                })
+
+            pwd1 = request.POST.get('password', '')
+            pwd2 = request.POST.get('password2', '')
+            if pwd1 != pwd2:
+                return render(request, 'users/register.html', {
+                    'register_form': register_form,
+                    'msg': '密码不一样'
+                })
+
+            user = User()
+            user.username = user_name
+            user.email = user_name
+            user.is_active = False
+            user.password = make_password(pwd1)
+            user.save()
+            # send_type_email.delay(user_name, 'register')
+            return render(request, 'users/login.html')
+        else:
+            return render(request, 'users/register.html', {'register_form': register_form})
+
 
 # 用户登录
 # class LoginView(View):

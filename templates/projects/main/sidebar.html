@@ -1,0 +1,20 @@
+<div id="sidebar" role="complementary" aria-label="sidebar">
+    {% include 'common/site_nums.html' %}
+    <div id="hot-network-snippets" class="module">
+       <h4>
+         <a href="#">
+            Hot Network Projects
+         </a>
+       </h4>
+       {% for project in hot_projects %}
+         <div class="spacer">
+           <a>
+             <div class="answer-votes answered-accepted default">
+               {{ project.files }}
+             </div>
+           </a>
+             <a href="" class="snippet-title">{{ project.name }}</a>
+         </div>
+       {% endfor %}
+    </div>
+</div>

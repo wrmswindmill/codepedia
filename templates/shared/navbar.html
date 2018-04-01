@@ -1,0 +1,63 @@
+{% load staticfiles %}
+{% load static %}
+
+<nav class="navbar navbar-inverse">
+
+  <ul class="container-fluid" style="margin-bottom: 0px !important;height: 50px;">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <img class="brand_img" src="{% static 'image/CodePedia.ico' %}"><a class="navbar-brand" href="{% url 'index' %}">CodePedia</a>
+    </div>
+    <li style="height: 50px !important;" class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class='active'><a href="{% url 'index' %}">Home</a></li>
+        <li class='active'><a href="{% url 'projects:list' %}">Project</a></li>
+        {% comment %} <li class='active'><a href="{% url 'file_list' %}">File</a></li>
+        <li class='active'><a href="{% url 'method_list' %}">Method</a></li> 
+        <li {% if request.path|slice:'8' == '/snippet' %}class='active'{% endif %}><a href="">Snippet</a></li>  {% endcomment %}
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+          {% if  request.user.is_authenticated %}
+                <li><img width="38" height="38" style='margin-top: 5px;' src="{{ MEDIA_URL }}{{ request.user.image }}"/></li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.username }}<span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                     <li class="userdetail">
+                            <dl>
+                                <dt>
+                                    <img width="80" height="80" src="{{ MEDIA_URL }}{{ request.user.image }}"/>
+                                </dt>
+                                <dd>
+                                    <a>{{ request.user.nick_name }}</a>
+                                </dd>
+                            </dl>
+                            <div style='' class="btn">
+                                <a  class="fl" href="{% url 'users:user_info' %}">进入个人中心</a>
+                                <a  class="fr" href="{% url 'users:logout' %}">退出</a>
+                            </div>
+                     </li>
+                  </ul>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">个人记录<span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                      <li><a href="">提交代码</a></li>
+                      <li><a href="">我的问题</a></li>
+                      <li><a href="">我的回答</a></li>
+                      <li><a href="">我的注释</a></li>
+                      <li><a href="">我的评论</a></li>
+                      <li><a href="">我的点赞</a></li>
+                      <li><a href="">我的点踩</a></li>
+                      <li><a href="{% url 'users:logout' %}">退出</a></li>
+                  </ul>
+                </li>
+          {% else %}
+                <li><a href="{% url 'users:register' %}">注册</a></li>
+                <li><a href="{% url 'users:login' %}">登陆</a></li>
+          {% endif %}
+      </ul>
+    </li>
+    </ul>
+  </div>
+</nav>
+

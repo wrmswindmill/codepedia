@@ -1,0 +1,30 @@
+<!DOCTYPE html> {% load static %} {% load crispy_forms_tags %}
+<html>
+
+<head>
+    <title>{% block title %}CodePedia{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+    <link rel="stylesheet" type="text/css" href="{%  static 'css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{%  static 'css/common.css' %}">
+    <link rel="stylesheet" type="text/css" href="{%  static 'vendor/bootstrap/css/bootstrap.css' %}">
+    <link rel="stylesheet" type="text/css" href="{%  static 'vendor/font-awesome/css/font-awesome.css' %}">
+    <link rel="stylesheet" type="text/css" href="{%  static 'vendor/qtip/jquery.qtip.css' %}">
+    <link rel="stylesheet" type="text/css" href="{%  static 'css/jstree.css' %}">
+    <link rel="stylesheet" type="text/css" href="{%  static 'css/prettify.css' %}">
+    <script src="https://cdn.bootcss.com/jquery/2.1.3/jquery.min.js"></script> 
+    {% comment %} <script src="{%  static 'js/jquery.min.js' %}"></script> {% endcomment %}
+    <script src="{%  static 'js/jstree.js' %}"></script>
+    <script src="{%  static 'js/run_prettify.js' %}"></script>
+    <script src="{%  static 'js/base.js' %}"></script>
+    <script src="{%  static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{%  static 'vendor/qtip/jquery.qtip.js' %}"></script> {% block custom_css %} {% endblock %}
+</head>
+
+<body>
+    {% include 'shared/navbar.html' %} 
+    {% block content %} {% endblock %}
+
+    {% include 'shared/footer.html' %} 
+    {% block custom_js %} {% endblock %}
+</body>
+</html>

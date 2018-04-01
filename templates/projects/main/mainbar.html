@@ -1,0 +1,19 @@
+<div id="mainbar">
+  <div class="subheader">
+    <h1 >All Projects</h1>
+    <div id='tabs' >
+        <a {% if sort == '' %}class='sort_item'{% endif %} href="?sort=">最近更新</a>
+        <a {% if sort == 'hot' %}class='sort_item'{% endif %}  href="?sort=hot">最热工程</a>
+    </div>
+  </div>
+  <div id="hot-tags"></div>
+  <div id='snippets'>
+      {% for project in all_projects %}
+        <div class="snippet-summary" id='project-{{ project.id }}'>
+            <div class="project_summary">
+               <h3><a href="/projects/{{project.name}}/xref/" class="project-hyperlink">{{ project.name }}</a></h3>
+            </div>
+        </div>
+      {% endfor %}
+  </div>
+</div> 
