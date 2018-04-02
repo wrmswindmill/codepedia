@@ -7,6 +7,7 @@ class Language(models.Model):
     name = models.CharField(max_length=50, verbose_name='编程语言')
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
+    src = models.CharField(max_length=50,verbose_name="编程语言源代码",null=True)
 
     class Meta:
         db_table = 'Source_Language'
@@ -45,7 +46,6 @@ class Project(models.Model):
             models.Index(fields=['views', ]),
             models.Index(fields=['create_time', ]),
             models.Index(fields=['uploader', ]),
-
         ]
 
     def __str__(self):

@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('xadmin/', xadmin.site.urls),
     path('', IndexView.as_view(), name="index"),
+    path('captcha/', include('captcha.urls')),
     path('projects/', include('projects.urls', namespace='projects')),
     path('operations/', include('operations.urls', namespace='operations')),
     path('users/', include('users.urls', namespace='users')),

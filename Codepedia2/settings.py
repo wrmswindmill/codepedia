@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    # 验证码
+    'captcha',
     # 微信登陆
     'allauth.socialaccount.providers.weixin',
     # 微博登陆

@@ -1,7 +1,7 @@
 import os
 from projects.models import File
 
-source_path = '/Users/yujie/workspace/opengrok/source/'
+source_path = '/opt/opengrok/source/'
 import logging
 from datetime import  datetime
 logger = logging.getLogger('django')

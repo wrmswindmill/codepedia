@@ -14,6 +14,7 @@ from .models import AnnotationComment, QuestionComment, AnswerComment, ArticleCo
 from .models import Vote
 from .forms import NewArticleForm
 from projects.models import File
+from projects.models import Language,Project
 
 
 class ShowAnnotationView(View):
@@ -71,10 +72,36 @@ class ShowNavigationView(View):
 class ShowMethodInfo(View):
     """
         获取当前方法的具体信息
+        return 
     """
-    pass
-    # def post(self ,request):
-    #     search_url = settings.
+    def post(self, request):
+        method_query_url = settings.OPENGROK_SEARCH_URL
+        query_str = request.POST.get('args','')
+        # query_str = "refs = Note & project = Notes"
+        for arg_str in query_str.split("&"):
+            para_value = arg_str.split("=")
+            if len(para_value)==2 and para_value[0]=='project':
+                project_name = para_value[1]
+                project = Project.objects.filter(name=project_name).first()
+                if project.language is None:
+                    #发邮件通知我出问题了
+                    pass
+                else:
+                    languageObj=Language.objects.filter(name=project.language).first()
+                    if languageObj is not None:
+                        query_str+= "&project="+languageObj.src
+
+        url = method_query_url+query_str
+        query_result = requests.get(url).text
+        print(query_result)
+        if query_result is not None:
+            result_dict = json.loads(query_result)
+            results = result_dict['results']
+            print("--------------------------------------------------")
+            print(results)
+            if len(results)>0:
+                return HttpResponse(json.dumps({"status": "success", "msg": results, "url": settings.OPENGROK_NAVIGATION_URL}), content_type='application/json')
+        return HttpResponse(json.dumps({"status": "failed", "msg": []}), content_type='application/json')
 
 
 class AddAnnotationView(View):

@@ -1,18 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'shared/base.html' %} 
+{% load staticfiles %} 
+{% load static %} 
+{% load crispy_forms_tags %} 
+
+{% block title %}导入工程{%endblock %} 
+
+{% block content %}
+    注意,填写工程请务必填写OPENGROK的Source目录下的相对路径,
+    例如:导入/opt/opengrok/Source/下的java1.8,在Project Name和Project Path处都填写java1.8即可
     <div class="col-md-6 col-md-offset-3">
         {{ error_msg }}
         <h5 style="text-align: center">导入工程</h5>
         <form method="post" action="{% url 'projects:new_project' %}"  >
-            {{ project_form  }}
+            {{ project_form | crispy}}
             {% csrf_token %}
             <input class="btn btn-green"  type="submit" value="Submit" />
         </form>
     </div>
-</body>
-</html>
+{% endblock %}

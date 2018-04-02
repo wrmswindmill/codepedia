@@ -52,7 +52,8 @@ class LoginView(View):
 class RegisterView(View):
 
     def get(self, request):
-        return render(request, 'users/register.html', None)
+        register_form = RegisterForm()
+        return render(request, 'users/register.html', locals())
 
     def post(self, request):
         register_form = RegisterForm(request.POST)       
@@ -78,6 +79,7 @@ class RegisterView(View):
             user.is_active = False
             user.password = make_password(pwd1)
             user.save()
+            
             # send_type_email.delay(user_name, 'register')
             return render(request, 'users/login.html')
         else:

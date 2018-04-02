@@ -80,6 +80,37 @@
             $("#annotation").html("------您将在此处为第" + line_num + "行代码添加注释或者问题-------")
         }
 
+        function search_symbol(args) {
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: '/operations/show_method_info/',
+                data: { 'args': args },
+                dataType: 'json',
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
+                },
+                success: function (data) {
+                    if (data.status === 'success') {
+                        var obj = data.msg;   
+                        var context = "";                     
+                        console.log(obj);
+                        for (let i = 0; i < obj.length; i++) {
+                            var filePath= obj[i]['path'];
+                            var filePathTag = "<a href=\"/projects"+filePath+"\">"+filePath+"</a>";
+                            var code= window.atob(obj[i]['line'])
+                            var lineno = obj[i]['lineno']
+                            var codeTag = "<a href=\"/projects" + filePath + "#L"+lineno+"\">" + code + "</a>";
+                            context += (i+1)+".  "+filePathTag+"&nbsp;&nbsp;&nbsp;&nbsp;"+ codeTag+"<br>";
+                        }
+                        console.log(context);
+                        $("#annotation").html(context);
+                    }
+                }
+            });
+        }
+
 
         function show_navigation(project_path, file_path) {
             $.ajax({
@@ -92,20 +123,14 @@
                 beforeSend: function (xhr, settings) {
                     xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
                 },
-                success: function (data) {
 
+                
+                success: function (data) {
                     if (data.status === 'success') {
                         var content = "";
                         //obj=“[['Class', [['AlarmAlertActivity', 43]]], ['Package', [['net.micode.notes.ui', 17]]], ['Method', [['isScreenOn', 86], ['onClick', 133], ['onCreate', 50], ['onDismiss', 146], ['playAlarmSound', 91], ['showActionDialog', 122], ['stopAlarmSound', 151]]]]”
                         var obj = data.msg;
                         console.log(obj);
-                        /* each loop create a html str,such as:
-                        <div id="Method">
-                            <div class='tags'>Method</div>
-                            <a class='def' href='#L86">isScreenOn</a><br>
-                            <a class='def' href='#L133">onClick</a><br>
-                            ...
-                        <div> */
                         for (let i = 0; i < obj.length; i++) {
                             var type = obj[i][0];
                             var str = '';
@@ -138,8 +163,9 @@
     {% for rel_path,abs_path in path_dict.items %} /
     <a href="{% url  'projects:source' project.name abs_path %}">{{ rel_path }}</a>
     {% endfor %}
-    <br> {# {% for rel_path,abs_path in path_dict.items %}#} {##} {# /
-    <a href="/projects/{{ project.name }}/xref{{ abs_path }}">{{ rel_path }}</a>#} {# {% endfor %}#}
+    <br> 
+    {% comment %} {# {% for rel_path,abs_path in path_dict.items %}#} {##} {# /
+    <a href="/projects/{{ project.name }}/xref{{ abs_path }}">{{ rel_path }}</a>#} {# {% endfor %}#} {% endcomment %}
 
     <h2>{{ file.id }}{{ file.name }}</h2>
     <div onclick="show_navigation('{{ project.path }}', '{{ file.path }}')" style="text-align: center"> Navigation </div>

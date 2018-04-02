@@ -33,10 +33,15 @@
                             <li class="new_register_li form-group {% if register_form.errors.password %} errorput{% endif %}">
                                 <input type="password" class="new_register_input"  id="id_password" name="password2"  value="{{ register_form.password2.value }}" placeholder="请再次输入密码" />
                             </li>
-                            {% comment %} <li class="new_register_li {% if register_form.errors.password %} errorput{% endif %}">{{ register_form.captcha }}</li> {% endcomment %}
+                            <li class="new_register_li form-group {% if register_form.errors.captcha %} errorput{% endif %}">{{ register_form.captcha }}</li> 
                         </ul>
 
-                        <div class="error btns" id="jsEmailTips">{% for key,error in register_form.errors.items %}{{ key }}{{ error }}{% endfor %}{{ msg }}</div>
+                        <div class="error btns" id="jsEmailTips">
+                            {% for key,error in register_form.errors.items %}
+                                {{ key }}{{ error }}
+                            {% endfor %}
+                            {{ msg }}
+                        </div>
                         
                         <div class="auto-box marb8"></div>
                         <input class="btn btn-green new_login_submit" id="jsEmailRegBtn" type="submit" value="注册并登录" />

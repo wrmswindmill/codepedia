@@ -12,8 +12,8 @@
       <ul class="nav navbar-nav">
         <li class='active'><a href="{% url 'index' %}">Home</a></li>
         <li class='active'><a href="{% url 'projects:list' %}">Project</a></li>
-        {% comment %} <li class='active'><a href="{% url 'file_list' %}">File</a></li>
-        <li class='active'><a href="{% url 'method_list' %}">Method</a></li> 
+        <li class='active'><a href="{% url 'file_list' %}">File</a></li>
+         {% comment %}<li class='active'><a href="{% url 'method_list' %}">Method</a></li> 
         <li {% if request.path|slice:'8' == '/snippet' %}class='active'{% endif %}><a href="">Snippet</a></li>  {% endcomment %}
       </ul>
       <ul class="nav navbar-nav navbar-right">

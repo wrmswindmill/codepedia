@@ -23,23 +23,23 @@ class NewProjectView(View):
     def post(self, request):
         project_form = NewProjectForm(request.POST)
         if project_form.is_valid():
-            logging.info('开始尝试导入工程')
+            # logging.info('开始尝试导入工程')
             project = project_form.save(commit=False)
             project.save()
             project_form.save_m2m()
             project_id = project.id
             root_path = project.path
             try:
-                logging.info(str(datetime.now()) + '准备导入工程')
+                # logging.info(str(datetime.now()) + '准备导入工程')
                 import_project(project_id, root_path)
-                logging.info(str(datetime.now()) + '导入工程完成')
+                # logging.info(str(datetime.now()) + '导入工程完成')
                 all_projects = Project.objects.all()
                 return render(request, 'projects/list.html', locals())
             except Exception as e:
-                logging.error(str(datetime.now()) + ' 导入' + str(project.name) + '失败，错误原因是：' + str(e) + '准备删除工程')
-                logging.info(str(datetime.now()) + '开始删除导入本工程，稍后重新导入')
+                # logging.error(str(datetime.now()) + ' 导入' + str(project.name) + '失败，错误原因是：' + str(e) + '准备删除工程')
+                # logging.info(str(datetime.now()) + '开始删除导入本工程，稍后重新导入')
                 project.delete()
-                logging.info(str(datetime.now()) + '删除完成稍后重新导入')
+                # logging.info(str(datetime.now()) + '删除完成稍后重新导入')
                 error_msg = '导入失败，请查看日志发现错误后重新导入'
                 return render(request, 'projects/new.html', locals())
 
@@ -70,6 +70,7 @@ class ProjectInfoView(View):
 class ProjectSourceView(View):
     def get(self, request, name, path):
         project = Project.objects.filter(name=name).first()
+        print(project)
         # 判断是否是根目录
         if path=='/':
             file = File.objects.filter(path='', project=project).first()
