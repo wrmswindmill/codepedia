@@ -1,0 +1,15 @@
+{% load base_filter %}
+<div class="votecell">
+    {% get_model_name vote_obj as model_name %}
+    {% judge_user_vote request model_name vote_obj.id as vote_value %}
+    <div class="vote">
+      <!-- 点赞 -->
+      <a class="fa sort up" {% if vote_value == 1 %} style="border-bottom:15px solid #f4e20e"{% endif %} onclick="add_vote('{% get_model_name vote_obj %}',{{ vote_obj.id }},1)"></a>
+      <!-- 点赞数量 -->
+      <span class='{% get_model_name vote_obj %}-{{ vote_obj.id }}-vote-count'>
+        {{ vote_obj.get_vote_num }}
+      </span>
+      <!--  点踩  -->
+      <a class="fa sort down" {% if vote_value == -1 %} style="border-top:15px solid #f4e20e"{% endif %} onclick="add_vote('{% get_model_name vote_obj %}',{{ vote_obj.id }},-1)"></a>
+    </div>
+</div>

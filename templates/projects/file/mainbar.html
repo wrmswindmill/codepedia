@@ -1,0 +1,14 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/project/project.css' %}">
+<div id='mainbar' class="clear" role='main' >
+  <div class="snippet clear"   data-fileid='{{ file.id }}'>
+        {% include 'common/vote.html' with vote_obj=file %}
+      <div class="postcell">
+        {% include 'projects/common/summary.html' with summary_obj=file %}
+        {% include 'projects/common/code.html' with lines_obj=lines model='file' line_que_obj=file %}
+        {% include 'projects/common/tag.html' with tag_obj=file %}
+        {% include 'common/user_info.html' with user_obj=file %}
+      </div>
+  </div>
+      {% include 'qa/question.html' with question_objs=all_questions q_obj=file  model='file' %}
+</div>

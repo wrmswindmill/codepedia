@@ -1,0 +1,92 @@
+<div id="sidebar">
+    {% include 'projects/common/sidebar_state.html' with stat_obj=file %}
+    {% include 'projects/common/sidebar_question.html' with side_question_obj=file question_objs=hot_questions %}
+
+  <!-- 查看该代码文件夹的方法 -->
+  {% if file.function_set.count > 0 %}
+    <div id="hot-questions" class="module">
+      <h4>Methods</h4>
+      <div id="function_tree">
+
+      </div>
+    </div>
+  {% endif %}
+
+  <div id="snippet-relationship" class="module">
+     <h4>Package Explorer</h4>
+     <div id='method_tree'></div>
+  </div>
+</div>
+
+<script type="text/javascript">
+$(function(){
+  $('#method_tree').jstree({ 'core' : {
+    'data' : {
+      'url': '{% url 'projects:project_tree' file.project_id %}',
+      "dataType" : "json"
+      }
+    }
+  }).bind("select_node.jstree", function (e, data) {
+    // 获取节点内容
+    var file = data.node.text ;
+    // 获取节点路径
+    // var path = $(this).jstree(true).get_path(data.node,'/')
+    var path = data.instance.get_path(data.selected[0],"/",0)
+    //  获取rel属性
+    var suffix = data.node.a_attr.rel
+
+    var project_id = {{ file.project_id  }}
+    // 判断是文件还是文件夹
+    if (typeof(suffix) == 'undefined') {
+      // 如果是文件夹目录
+      var href =  '/projects/detail/'+ project_id + '/path_find/?relpath='+path+'&text='+file
+      if(href == '#')
+        return '';
+      window.open(href, "_self");
+    } else {
+      // 如果是文件
+      // 获取rel，即路径
+      path = '/'+data.node.a_attr.rel
+        var href =  '/projects/detail/'+ project_id + '/find_file/?path='+path
+             if(href == '#')
+        return '';
+      window.open(href, "_self");
+    }
+  }).bind('loaded.jstree', function(e,data) {
+    data.instance.open_all()
+    $('a.jstree-anchor').each(function(){
+      var rel = '/'+$(this).attr('rel')
+      if (rel == '{{ file.path }}') {
+        $(this).css('color','red')
+        $(this).parent('li').siblings().each(function(){
+          $(this).children('i').click()
+        });
+        $(this).parent('li').parent('ul').parent('li').siblings().each(function(){
+          $(this).children('i').click()
+        });
+        $(this).parent('li').parent('ul').parent('li').parent('ul').parent('li').siblings().each(function(){
+          $(this).children('i').click()
+        });
+        $(this).parent('li').parent('ul').parent('li').parent('ul').parent('li').parent('ul').parent('li').siblings().each(function(){
+          $(this).children('i').click()
+        });
+        }
+      })
+  })
+
+
+  $('#function_tree').jstree({
+    'core': {
+      'data': {
+        'url': '{% url 'projects:file_function' project.id file.id %}',
+        "dataType": "json"
+      }
+    }
+  }).bind('select_node.jstree', function (e, data) {
+    var href = data.node.a_attr.href;
+    document.location.href = href;
+  })
+
+
+})
+  </script>

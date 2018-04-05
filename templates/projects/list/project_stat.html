@@ -1,0 +1,43 @@
+<div class="project_statscontainer" id="project-{{ project.id }}" >
+      <div class='project_stat'>
+          <div class='project_info'>
+              <div class='project_blobs_num'>{{ project.file_set.count }}  </div>
+              <div style='text-align:center'>Files</div>
+          </div>
+         {% comment %}
+         <div class='project_info'>
+              <div class='project_blobs_num'>{{ project.function_set.count }}</div>
+              <div style='text-align:center'>methods</div>
+          </div>
+         {% endcomment %}
+          <div class='project_info'>
+              <div class='project_blobs_num project_star_num'></div>
+              <div style='text-align:center'>Stars</div>
+          </div>
+          <div class='project_info'>
+              <div class='project_blobs_num project_fork_num'style=""></div>
+              <div style='text-align:center'>fork</div>
+          </div>
+      </div>
+</div>
+<script type="text/javascript">
+  //获取工程的star数量和fork数量
+  //如果没有显示,一般是github的地址不对
+  $(function(){
+     var github = '{{ project.github }}'
+     org = github.split('/').slice(-2)
+     org = org[0]+'/'+org[1]
+        $.ajax({
+        url:'https://api.github.com/repos/'+org,
+        dataType:'json',
+        success:function(response){
+          start_num = (response['stargazers_count']/1000).toFixed(1)
+          fork_num = (response['forks']/1000).toFixed(1)
+          $('#project-{{ project.id }} .project_star_num').text(start_num  +'K')
+          $('#project-{{ project.id }} .project_fork_num').text(fork_num +'K')
+        }
+      }
+
+      );
+  })
+</script>

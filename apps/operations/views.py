@@ -24,12 +24,24 @@ class ShowAnnotationView(View):
     def post(self, request):
         # if not request.user.is_authenticated:
         #     return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
-        file_id = int(request.POST.get('file_id', ''))
-        line_num = int(request.POST.get('line_num', ''))
-
+        # file_id = int(request.POST.get('file_id', ''))
+        # line_num = int(request.POST.get('line_num', ''))
+        file_id = 118
+        line_num = 1
+        # annotations 
         annotations = Annotation.objects.filter(file_id=file_id, linenum=line_num)
+        
+        anno_ids = []
+        for anno in annotations:
+            anno_ids.append(anno.id)
+        anno_comments = AnnotationComment.objects.filter(annotation_id__in=anno_ids)
+        anno_comments = sorted(anno_comments, key=lambda anno_comment: anno_comment.annotation_id)
+
+        anno_comments = serializers.serialize("json", anno_comments)
         annotations = serializers.serialize("json", annotations)
-        return HttpResponse(json.dumps({"status": "success", "msg": annotations}), content_type='application/json')
+        # print(annotations)
+        # print(anno_comments)
+        return HttpResponse(json.dumps({"status": "success", "annos": annotations, "anno_comments": anno_comments}), content_type='application/json')
         # return JsonResponse(annotations, safe=False)
 
 
@@ -42,6 +54,15 @@ class ShowQuestionView(View):
         line_num = int(request.POST.get('line_num', ''))
         questions = Question.objects.filter(file_id=file_id, linenum=line_num)
         questions = serializers.serialize("json", questions)
+
+        # question_ids = []
+        # for question in questions:
+        #     question_ids.append(question.id)
+        # question_comments = QuestionComment.objects.filter(
+        #     question_id__in=question_ids)
+        # question_comments = sorted(
+        #     question_comments, key=lambda question_comment: question_comments.question_id)
+
         return HttpResponse(json.dumps({"status": "success", "msg": questions}), content_type='application/json')
 
 

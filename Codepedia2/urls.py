@@ -19,6 +19,10 @@ import xadmin
 import debug_toolbar
 
 from users.views import IndexView
+from projects.views import FileListlView
+
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,8 +31,10 @@ urlpatterns = [
     path('captcha/', include('captcha.urls')),
     path('projects/', include('projects.urls', namespace='projects')),
     path('operations/', include('operations.urls', namespace='operations')),
+    path('files/', FileListlView.as_view(), name="files"),
     path('users/', include('users.urls', namespace='users')),
+   # path('static/', serve, {'document_root': settings.STATIC_ROOT}),
     # 第三方登陆
     path('accounts/', include('allauth.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

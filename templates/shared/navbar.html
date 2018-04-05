@@ -12,27 +12,27 @@
       <ul class="nav navbar-nav">
         <li class='active'><a href="{% url 'index' %}">Home</a></li>
         <li class='active'><a href="{% url 'projects:list' %}">Project</a></li>
-        <li class='active'><a href="{% url 'file_list' %}">File</a></li>
+        <li class='active'><a href="{% url 'files' %}">File</a></li>
          {% comment %}<li class='active'><a href="{% url 'method_list' %}">Method</a></li> 
-        <li {% if request.path|slice:'8' == '/snippet' %}class='active'{% endif %}><a href="">Snippet</a></li>  {% endcomment %}
+        <li> {% if request.path|slice:'8' == '/snippet' %}class='active'{% endif %}><a href="">Snippet</a></li> {% endcomment %}
       </ul>
       <ul class="nav navbar-nav navbar-right">
           {% if  request.user.is_authenticated %}
-                <li><img width="38" height="38" style='margin-top: 5px;' src="{{ MEDIA_URL }}{{ request.user.image }}"/></li>
+                <li><img width="38" height="38" style='margin-top: 5px;' src="{{ MEDIA_URL }}{{ request.user.avatar }}"/></li>
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.username }}<span class="caret"></span></a>
                   <ul class="dropdown-menu">
                      <li class="userdetail">
                             <dl>
                                 <dt>
-                                    <img width="80" height="80" src="{{ MEDIA_URL }}{{ request.user.image }}"/>
+                                    <img width="80" height="80" src="{{ MEDIA_URL }}{{ request.user.avatar }}"/>
                                 </dt>
                                 <dd>
                                     <a>{{ request.user.nick_name }}</a>
                                 </dd>
                             </dl>
                             <div style='' class="btn">
-                                <a  class="fl" href="{% url 'users:user_info' %}">进入个人中心</a>
+                                <a  class="fl" href="{% url 'users:userinfo' %}">进入个人中心</a>
                                 <a  class="fr" href="{% url 'users:logout' %}">退出</a>
                             </div>
                      </li>

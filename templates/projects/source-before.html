@@ -1,0 +1,216 @@
+{% load base_filter %} {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <!-- <script type="application/javascript" src="{%  static 'js/jquery-3.3.1.min.js' %}"></script> -->
+    <script type="application/javascript" src="{%  static 'js/prettify.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{%  static 'css/prettify.css' %}">
+    <link rel="stylesheet" type="text/css" href="{%  static 'css/code_show.css' %}">
+    <title>{{ project.name }}-{{ project.desc }}</title>
+    <script type="application/javascript">
+
+        function show_annotation(file_id, line_num) {
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: '/operations/show_annotation/',
+                data: { 'file_id': file_id, 'line_num': line_num },
+                dataType: 'json',
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
+                },
+                success: function (data) {
+                    var tbody = "";
+                    //------------取出该行代码的annotation-------------
+                    var annos = JSON.parse(data.annos);
+                    var anno_comments = JSON.parse(data.anno_comments)
+                    $("#annotation").html("-----------该行代码的所有注释----------<br>");
+                    //下面使用each进行遍历
+                    var trs = '';
+
+                    comment_index=0
+                    $.each(annos, function (index, value) {
+                        console.log(value);
+                        trs += (index + 1) + "    :  <br>" +
+                            "&nbsp;&nbsp;&nbsp;vote:   " + value.fields['vote'] + "<br>" +
+                            "&nbsp;&nbsp;&nbsp;content:    " + value.fields['content'] + "<br>" +
+                            "&nbsp;&nbsp;&nbsp;user_id:    " + value.fields['user'] + "<br>";                        
+                        trs +="--comments:--      <br>"
+                        for (let j = comment_index; j < anno_comments.length; j++) {
+                            if (anno_comments[j].fields['annotation']!=value.pk){
+                                comment_index = j;
+                                break;
+                            }
+                            trs += (j-comment_index + 1) + "    :  <br>" +
+                                "&nbsp;&nbsp;&nbsp;vote:   " + value.fields['vote'] + "<br>" +
+                                "&nbsp;&nbsp;&nbsp;content:    " + value.fields['content'] + "<br>" +
+                                "&nbsp;&nbsp;&nbsp;user_id:    " + value.fields['user'] + "<br>";                                                    
+                        }
+
+                    });
+                    $("#annotation").append(trs)
+                }
+            });
+        }
+
+        function show_question(file_id, line_num) {
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: '/operations/show_question/',
+                data: { 'file_id': file_id, 'line_num': line_num },
+                dataType: 'json',
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
+                },
+                success: function (data) {
+                    var tbody = "";
+                    //------------取出该行代码的annotation-------------
+                    var obj = JSON.parse(data.msg);
+
+                    $("#annotation").html("-----------该行代码的所有问题----------<br>");
+                    //下面使用each进行遍历
+                    $.each(obj, function (index, value) {
+                        console.log(value);
+                        var trs = '';
+                        trs += (index + 1) + "    :  <br>" +
+                            "&nbsp;&nbsp;&nbsp;question_id: " + value.pk + "<br>" +
+                            "&nbsp;&nbsp;&nbsp;content:  " + value.fields['content'] + "<br>" +
+                            "&nbsp;&nbsp;&nbsp;user_id:  " + value.fields['user'] + "<br>";
+                        $("#annotation").append(trs)
+
+                    });
+                }
+            });
+        }
+
+
+        function add_annotation(file_id, line_num) {
+            $("#annotation").html("------您将在此处为第" + line_num + "行代码添加注释或者问题-------")
+        }
+
+        function search_symbol(args) {
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: '/operations/show_method_info/',
+                data: { 'args': args },
+                dataType: 'json',
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
+                },
+                success: function (data) {
+                    if (data.status === 'success') {
+                        var obj = data.msg;   
+                        var context = "";                     
+                        console.log(obj);
+                        for (let i = 0; i < obj.length; i++) {
+                            var filePath= obj[i]['path'];
+                            var filePathTag = "<a href=\"/projects"+filePath+"\">"+filePath+"</a>";
+                            var code= window.atob(obj[i]['line'])
+                            var lineno = obj[i]['lineno']
+                            var codeTag = "<a href=\"/projects" + filePath + "#L"+lineno+"\">" + code + "</a>";
+                            context += (i+1)+".  "+filePathTag+"&nbsp;&nbsp;&nbsp;&nbsp;"+ codeTag+"<br>";
+                        }
+                        console.log(context);
+                        $("#annotation").html(context);
+                    }
+                }
+            });
+        }
+
+
+        function show_navigation(project_path, file_path) {
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: '/operations/show_navigation/',
+                data: { 'project_path': project_path, 'file_path': file_path },
+                dataType: 'json',
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
+                },
+
+                
+                success: function (data) {
+                    if (data.status === 'success') {
+                        var content = "";
+                        //obj=“[['Class', [['AlarmAlertActivity', 43]]], ['Package', [['net.micode.notes.ui', 17]]], ['Method', [['isScreenOn', 86], ['onClick', 133], ['onCreate', 50], ['onDismiss', 146], ['playAlarmSound', 91], ['showActionDialog', 122], ['stopAlarmSound', 151]]]]”
+                        var obj = data.msg;
+                        console.log(obj);
+                        for (let i = 0; i < obj.length; i++) {
+                            var type = obj[i][0];
+                            var str = '';
+                            str += "<div id=" + type + ">";
+                            str += "<div class='tags'>" + type + "</div>";
+                            if (obj.length > 1) {
+                                var items = obj[i][1];
+                                for (let j = 0; j < items.length; j++) {
+                                    var name = items[j][0];
+                                    var linenum = items[j][1];
+                                    str += "<a class='def' href='#L" + linenum + "'>" + name + "</a><br>" + "</div>";
+                                }
+                            }
+                            str += "</div>";
+                            content += str;
+                        }
+                        $("#annotation").html(content)
+                    }
+                    else {
+                        $("#annotation").html(data.msg)
+                    }
+                }
+            });
+        }
+
+    </script>
+</head>
+
+<body>
+    {% for rel_path,abs_path in path_dict.items %} /
+    <a href="{% url  'projects:source' project.name abs_path %}">{{ rel_path }}</a>
+    {% endfor %}
+    <br> 
+    {% comment %} {# {% for rel_path,abs_path in path_dict.items %}#} {##} {# /
+    <a href="/projects/{{ project.name }}/xref{{ abs_path }}">{{ rel_path }}</a>#} {# {% endfor %}#} {% endcomment %}
+
+    <h2>{{ file.id }}{{ file.name }}</h2>
+    <div onclick="show_navigation('{{ project.path }}', '{{ file.path }}')" style="text-align: center"> Navigation </div>
+    <div class="codereading">
+        {% formatText2Line project.path file.path as lines %} {% for linenum,line in lines.items %}
+        <div id="L{{ linenum }}" class="codeline" style="">
+            <div id="linenum_{{ linenum  }}" class="linenum">{{ linenum }}</div>
+
+            <div id="code_{{ linenum }}" class="sourcecode">
+                <pre class="prettyprint">{{ line|safe }}</pre>
+            </div>
+
+            <div id="linestatus_{{ linenum }}" class="linestatus">
+                <span id="annonums_{{ linenum }}" class="annonums" onclick="show_annotation({{ file.id }},{{ linenum }})">
+                    {% comment %}
+                    {% if linenum in annos_count %} {{ annos_count|keyValue:linenum }} {% endif %}
+                    {% endcomment %}
+                    1
+                </span>
+                <span id="questionums_{{ linenum }}" class="questionnums" onclick="show_question({{ file.id }},{{ linenum }})">
+                    {% if linenum in question_count %} {{ question_count|keyValue:linenum }} {% endif %}
+                </span>
+
+                <span id="addanno_{{ linenum }}" class="addanno" onclick="add_annotation({{ file.id }},{{ linenum }})"> + </span>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+    <div style="float: left;width: 25%; margin-left: 30px;" id="annotation"></div>
+    <div style="float: left;width: 25%; margin-left: 30px;" id="navigation"></div>
+</body>
+
+</html>

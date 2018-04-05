@@ -7,6 +7,8 @@
 一个是Source File,这个表包含了工程对应的文件的具体路径,投票数,观看数等具体信息.
 4.最好选择的时候能够提供一个选择框,这样不会容易出错
 
+## 通过邮箱激活:
+1.django中已经有发送邮件的模块了:django.core.mail:https://docs.djangoproject.com/en/2.0/topics/email/
 
 问题:
 

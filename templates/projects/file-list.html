@@ -1,0 +1,14 @@
+{% extends 'shared/base.html' %}
+{% load staticfiles   %}
+{% block title %}
+All Files
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div id="content" class="snippet-hidden">
+            {% include 'projects/file/mainbar.html' with obj_list=all_files model_cap='Files' %}
+            {% include 'projects/file/sidebar.html' with obj_list=all_files model_cap='Files' %}
+        </div>
+    </div>
+{% endblock %}

@@ -10,10 +10,11 @@
   <div id='snippets'>
       {% for project in all_projects %}
         <div class="snippet-summary" id='project-{{ project.id }}'>
+            {% include 'projects/list/project_stat.html' %}
             <div class="project_summary">
                <h3><a href="/projects/{{project.name}}/" class="project-hyperlink">{{ project.name }}</a></h3>
             </div>
         </div>
       {% endfor %}
   </div>
-</div> 
+</div>

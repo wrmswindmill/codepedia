@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import sys
 import os
 
+DOMAIN_URL="http://localhost:8000"
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
@@ -95,6 +97,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
                 # allauth
                 'django.template.context_processors.request',
 
@@ -188,13 +191,19 @@ STATICFILES_FINDERS = (
 )
 
 # 配置邮件发送
+# EMAIL_HOST = 'smtp.yeah.net'
+# EMAIL_PORT = 25
+# EMAIL_HOST_USER = 'alexkie@yeah.net'
+# EMAIL_HOST_PASSWORD = 'Mr8023Mr'
+# EMAIL_USE_TLS = False
+# EMAIL_FROM = 'alexkie@yeah.net'
+
 EMAIL_HOST = 'smtp.yeah.net'
 EMAIL_PORT = 25
-EMAIL_HOST_USER = 'alexkie@yeah.net'
-EMAIL_HOST_PASSWORD = 'Mr8023Mr'
-EMAIL_USE_TLS = False
-EMAIL_FROM = 'alexkie@yeah.net'
-
+EMAIL_HOST_USER = 'codepedia@yeah.net'
+EMAIL_HOST_PASSWORD = 'codepedia123123'
+EMAIL_USE_TLS = True
+# EMAIL_FROM = 'codepedia@yeah.net'
 
 # 设置我们上传文件的路径
 

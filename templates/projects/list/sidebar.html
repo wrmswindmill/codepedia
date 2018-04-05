@@ -6,14 +6,14 @@
             Hot Network Projects
          </a>
        </h4>
-       {% for project in hot_projects %}
+         {% for project in hot_projects %}
          <div class="spacer">
            <a>
              <div class="answer-votes answered-accepted default">
                {{ project.files }}
              </div>
            </a>
-             <a href="" class="snippet-title">{{ project.name }}</a>
+            <a href="" class="snippet-title">{{ project.name }}</a>
          </div>
        {% endfor %}
     </div>

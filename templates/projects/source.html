@@ -1,3 +1,4 @@
+
 {% load base_filter %} {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -5,115 +6,102 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
-    <!-- <script type="application/javascript" src="{%  static 'js/jquery-3.3.1.min.js' %}"></script> -->
-    <script type="application/javascript" src="{%  static 'js/prettify.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{%  static 'css/prettify.css' %}">
-    <link rel="stylesheet" type="text/css" href="{%  static 'css/code_show.css' %}">
+    <!-- <script type="application/javascript" src="/static/js/jquery-3.3.1.min.js"></script> -->
+    <script type="application/javascript" src="/static/js/prettify.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/prettify.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/code_show.css">
     <title>{{ project.name }}-{{ project.desc }}</title>
     <script type="application/javascript">
 
-        function show_annotation(file_id, line_num) {
-            $.ajax({
-                cache: false,
-                type: "POST",
-                url: '/operations/show_annotation/',
-                data: { 'file_id': file_id, 'line_num': line_num },
-                dataType: 'json',
-                async: true,
-                beforeSend: function (xhr, settings) {
-                    xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
-                },
-                success: function (data) {
-                    var tbody = "";
-                    //------------取出该行代码的annotation-------------
-                    var obj = JSON.parse(data.msg);
+        $("#filelist-content").html({{ project_tree}});
+        var flag=true;//左侧默认显示
 
-                    $("#annotation").html("-----------该行代码的所有注释----------<br>");
-                    //下面使用each进行遍历
-                    $.each(obj, function (index, value) {
-                        console.log(value);
-                        var trs = '';
-                        trs += (index + 1) + "    :  <br>" +
-                            "&nbsp;&nbsp;&nbsp;annotation_id:   " + value.pk + "<br>" +
-                            "&nbsp;&nbsp;&nbsp;content:    " + value.fields['content'] + "<br>" +
-                            "&nbsp;&nbsp;&nbsp;user_id:    " + value.fields['user'] + "<br>";
-                        $("#annotation").append(trs)
-                    });
-                }
-            });
+        function show_annotation(file_id, line_num) {
+            
+            // var tbody = "";
+            // //------------取出该行代码的annotation-------------
+            // var obj = JSON.parse(data.msg);
+
+            // $("#annotation").html("-----------该行代码的所有注释----------<br>");
+            // //下面使用each进行遍历
+            // $.each(obj, function (index, value) {
+            //     console.log(value);
+            //     var trs = '';
+            //     trs += (index + 1) + "    :  <br>" +
+            //         "&nbsp;&nbsp;&nbsp;annotation_id:   " + value.pk + "<br>" +
+            //         "&nbsp;&nbsp;&nbsp;content:    " + value.fields['content'] + "<br>" +
+            //         "&nbsp;&nbsp;&nbsp;user_id:    " + value.fields['user'] + "<br>";
+            //     $("#annotation").append(trs)
+            // });
+
+            $("#annotation").html(context);
+
+            var left = ($(".left").width());
+            if (flag) {
+                $(".codereading").css("width", "60%");
+            } else {
+                var wid = $(".codereading").width();
+                $(".codereading").css("width", wid - (left * 2) + "px");
+            }
+            $(".right").removeClass("none");
         }
+
 
         function show_question(file_id, line_num) {
-            $.ajax({
-                cache: false,
-                type: "POST",
-                url: '/operations/show_question/',
-                data: { 'file_id': file_id, 'line_num': line_num },
-                dataType: 'json',
-                async: true,
-                beforeSend: function (xhr, settings) {
-                    xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
-                },
-                success: function (data) {
-                    var tbody = "";
-                    //------------取出该行代码的annotation-------------
-                    var obj = JSON.parse(data.msg);
+           
+            /*var tbody = "";
+            //------------取出该行代码的annotation-------------
+            var obj = JSON.parse(data.msg);
 
-                    $("#annotation").html("-----------该行代码的所有问题----------<br>");
-                    //下面使用each进行遍历
-                    $.each(obj, function (index, value) {
-                        console.log(value);
-                        var trs = '';
-                        trs += (index + 1) + "    :  <br>" +
-                            "&nbsp;&nbsp;&nbsp;question_id: " + value.pk + "<br>" +
-                            "&nbsp;&nbsp;&nbsp;content:  " + value.fields['content'] + "<br>" +
-                            "&nbsp;&nbsp;&nbsp;user_id:  " + value.fields['user'] + "<br>";
-                        $("#annotation").append(trs)
+            $("#annotation").html("-----------该行代码的所有问题----------<br>");
+            //下面使用each进行遍历
+            $.each(obj, function (index, value) {
+                console.log(value);
+                var trs = '';
+                trs += (index + 1) + "    :  <br>" +
+                    "&nbsp;&nbsp;&nbsp;question_id: " + value.pk + "<br>" +
+                    "&nbsp;&nbsp;&nbsp;content:  " + value.fields['content'] + "<br>" +
+                    "&nbsp;&nbsp;&nbsp;user_id:  " + value.fields['user'] + "<br>";
+                $("#annotation").append(trs)
 
-                    });
-                }
-            });
+            });*/
+            var left=($(".left").width());
+            if(flag){
+                $(".codereading").css("width","60%");
+            }else{
+                var wid=$(".codereading").width();
+                $(".codereading").css("width",wid-(left*2)+"px");
+            }
+            $(".right").removeClass("none");
         }
 
 
-        function add_annotation(file_id, line_num) {
-            $("#annotation").html("------您将在此处为第" + line_num + "行代码添加注释或者问题-------")
+        function add_annotation(item,file_id, line_num) {
+            $(item).siblings("#addno-panel").show()
+            //$("#annotation").html("------您将在此处为第" + line_num + "行代码添加注释或者问题-------")
         }
 
         function search_symbol(args) {
-            $.ajax({
-                cache: false,
-                type: "POST",
-                url: '/operations/show_method_info/',
-                data: { 'args': args },
-                dataType: 'json',
-                async: true,
-                beforeSend: function (xhr, settings) {
-                    xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
-                },
-                success: function (data) {
-                    if (data.status === 'success') {
-                        var obj = data.msg;   
-                        var context = "";                     
-                        console.log(obj);
-                        for (let i = 0; i < obj.length; i++) {
-                            var filePath= obj[i]['path'];
-                            var filePathTag = "<a href=\"/projects"+filePath+"\">"+filePath+"</a>";
-                            var code= window.atob(obj[i]['line'])
-                            var lineno = obj[i]['lineno']
-                            var codeTag = "<a href=\"/projects" + filePath + "#L"+lineno+"\">" + code + "</a>";
-                            context += (i+1)+".  "+filePathTag+"&nbsp;&nbsp;&nbsp;&nbsp;"+ codeTag+"<br>";
-                        }
-                        console.log(context);
-                        $("#annotation").html(context);
-                    }
+                var obj = [{'path': '/java1.8/java/util/Arrays.java', 'filename': 'Arrays.java', 'lineno': '3800', 'line': 'ICAgICAgICByZXR1cm4gbmV3IDxiPkFycmF5TGlzdDwvYj4mbHQ7Jmd0OyhhKTs=', 'directory': '\\/java1.8\\/java\\/util'}, {'path': '/java1.8/java/util/Arrays.java', 'filename': 'Arrays.java', 'lineno': '3806', 'line': 'ICAgIHByaXZhdGUgc3RhdGljIGNsYXNzIDxiPkFycmF5TGlzdDwvYj4mbHQ7RSZndDsgZXh0ZW5kcyBBYnN0cmFjdExpc3QmbHQ7RSZndDs=', 'directory': '\\/java1.8\\/java\\/util'}, {'path': '/java1.8/java/util/Arrays.java', 'filename': 'Arrays.java', 'lineno': '3812', 'line': 'ICAgICAgICA8Yj5BcnJheUxpc3Q8L2I+KEVbXSBhcnJheSkgew==', 'directory': '\\/java1.8\\/java\\/util'}, {'path': '/java1.8/java/util/ArrayList.java', 'filename': 'ArrayList.java', 'lineno': '48', 'line': 'ICogJmx0O3AmZ3Q7RWFjaCAmbHQ7dHQmZ3Q7PGI+QXJyYXlMaXN0PC9iPiZsdDsvdHQmZ3Q7IGluc3RhbmNlIGhhcyBhICZsdDtpJmd0O2NhcGFjaXR5Jmx0Oy9pJmd0Oy4gIFRoZSBjYXBhY2l0eSBpcw==', 'directory': '\\/java1.8\\/java\\/util'},{'path': '/java1.8/java/util/Arrays.java', 'filename': 'Arrays.java', 'lineno': '3800', 'line': 'ICAgICAgICByZXR1cm4gbmV3IDxiPkFycmF5TGlzdDwvYj4mbHQ7Jmd0OyhhKTs=', 'directory': '\\/java1.8\\/java\\/util'}, {'path': '/java1.8/java/util/Arrays.java', 'filename': 'Arrays.java', 'lineno': '3806', 'line': 'ICAgIHByaXZhdGUgc3RhdGljIGNsYXNzIDxiPkFycmF5TGlzdDwvYj4mbHQ7RSZndDsgZXh0ZW5kcyBBYnN0cmFjdExpc3QmbHQ7RSZndDs=', 'directory': '\\/java1.8\\/java\\/util'}, {'path': '/java1.8/java/util/Arrays.java', 'filename': 'Arrays.java', 'lineno': '3812', 'line': 'ICAgICAgICA8Yj5BcnJheUxpc3Q8L2I+KEVbXSBhcnJheSkgew==', 'directory': '\\/java1.8\\/java\\/util'}, {'path': '/java1.8/java/util/ArrayList.java', 'filename': 'ArrayList.java', 'lineno': '48', 'line': 'ICogJmx0O3AmZ3Q7RWFjaCAmbHQ7dHQmZ3Q7PGI+QXJyYXlMaXN0PC9iPiZsdDsvdHQmZ3Q7IGluc3RhbmNlIGhhcyBhICZsdDtpJmd0O2NhcGFjaXR5Jmx0Oy9pJmd0Oy4gIFRoZSBjYXBhY2l0eSBpcw==', 'directory': '\\/java1.8\\/java\\/util'}];   
+                var context = "";                     
+                console.log(obj);
+                for (let i = 0; i < obj.length; i++) {
+                    var filePath= obj[i]['path'];
+                    var filePathTag = "<a href=\"/projects"+filePath+"\">"+filePath+"</a>";
+                    var code= window.atob(obj[i]['line'])
+                    var lineno = obj[i]['lineno']
+                    var codeTag = "<a href=\"/projects" + filePath + "#L"+lineno+"\">" + code + "</a>";
+                    context += (i+1)+".  "+filePathTag+"&nbsp;&nbsp;&nbsp;&nbsp;"+ codeTag+"<br>";
                 }
-            });
-        }
+                console.log(context);
+                $("#annotation").html(context);
+            }
+
 
 
         function show_navigation(project_path, file_path) {
-            $.ajax({
+
+		        $.ajax({
                 cache: false,
                 type: "POST",
                 url: '/operations/show_navigation/',
@@ -124,7 +112,6 @@
                     xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
                 },
 
-                
                 success: function (data) {
                     if (data.status === 'success') {
                         var content = "";
@@ -155,46 +142,229 @@
                 }
             });
         }
+        $(function(){
+            $("body").click(function(event){
+                //点击页面隐藏弹出框
+                if($("#addno-panel").css("display")=="block"){
+                    if($(event.target).parents().attr("id")=="addno-panel" || $(event.target).attr("id")=="addno-panel" || $(event.target).attr("class")=="put-option" || $(event.target).attr("class")=="put-text" || $(event.target).attr("id")=="submit" || $(event.target).attr("class")=="addanno-img"){
+                        return;
+                    }
+                    $("#addno-panel").hide();
+                }
+            })
+            $("#filelist-content .item").click(function(){
+                if($(this).siblings(".sub-item").length>0 && $(this).attr("show")=="0"){
+                    $(this).siblings(".sub-item").show();
+                    $(this).attr("show","1");
+                }else if($(this).attr("show")=="1"){
+                    $(this).siblings(".sub-item").hide();
+                    $(this).attr("show","0");
+                }
+            })
 
+            $(".left-tab li").click(function(){
+                $(".left-tab li").removeClass("active");
+                $(this).addClass("active");
+                $(".left-rightlist").hide();
+                if($(this).index() == 1){
+                    show_navigation('Notes', '/src/net/micode/notes/gtask/data/TaskList.java')
+                }
+                $(".left-rightlist").eq($(this).index()).show();
+
+                if(flag == false){
+                    $(".codereading").css("width","80%");
+                    $(".left").animate({"width":"20%"},1000);
+                }
+
+            })
+
+            /*隐藏左侧部分*/
+            $(".hideleft").click(function(){
+                var wid=$(".left").width();
+                $(".left").animate({"width":"70px"},800);
+                $(".left-tab li").removeClass("active");
+                $(".codereading").width(parseInt($(".codereading").width())+wid);
+                flag =false;
+            })
+
+            $(".up").bind("click",function(){
+                var count=$(this).siblings(".question-count").html();
+                if($(this).siblings(".down").hasClass("active")){
+                    $(".up,.down").removeClass("active");
+                    $(this).siblings(".question-count").html(parseInt(count)+1);
+                }else{
+                    if($(this).hasClass("active")){
+                        $(this).removeClass("active");
+                        $(this).siblings(".question-count").html(parseInt(count)-1);
+                    }else{
+                        $(this).siblings(".down").removeClass("active");
+                        $(this).addClass("active");
+                        $(this).siblings(".question-count").html(parseInt(count)+1);
+                    }
+                }
+            })
+            $(".down").bind("click",function(){
+                var count=$(this).siblings(".question-count").html();
+
+                if($(this).siblings(".up").hasClass("active")){
+                    $(".up,.down").removeClass("active");
+                    $(this).siblings(".question-count").html(parseInt(count)-1);
+                }else{
+                    if($(this).hasClass("active")){
+                        $(this).removeClass("active");
+                        $(this).siblings(".question-count").html(parseInt(count)+1);
+                    }else{
+                        $(this).siblings(".down").removeClass("active");
+                        $(this).addClass("active");
+                        $(this).siblings(".question-count").html(parseInt(count)-1);
+                    }
+                }
+            })
+        })
+        function addcomments(item){
+            $(item).siblings(".comment-write").removeClass("none");
+            $(item).addClass("none");
+        }
+
+        function cancelcom(item){
+            $(item).parents(".comment-write").siblings("#addcom").removeClass("none");
+            $(item).parents(".comment-write").addClass("none");
+        }
+        //添加评论
+        function addcommentaction(item){
+            var txt=$(item).siblings(".writetext").val();
+            if(txt ==""){
+                confirm("请输入评论内容");
+                return;
+            }
+            var html="";
+            html+="<div class=\"comment-item\">";
+            html+="<p class=\"comment-con\">"+txt+"</p>";
+            html+="<p class=\"comment-name\">----<a href=\"javascript:void(0)\">蔡世</a></p></div>";
+            $(item).parents(".comment-btn").before(html);
+            $(item).parents(".comment-btn").find(".comment-write").addClass("none");
+            $(item).parents(".comment-btn").find("#addcom").removeClass("none");
+            $(item).siblings(".writetext").val("");
+        }
     </script>
+
 </head>
 
-<body>
-    {% for rel_path,abs_path in path_dict.items %} /
-    <a href="{% url  'projects:source' project.name abs_path %}">{{ rel_path }}</a>
-    {% endfor %}
-    <br> 
-    {% comment %} {# {% for rel_path,abs_path in path_dict.items %}#} {##} {# /
-    <a href="/projects/{{ project.name }}/xref{{ abs_path }}">{{ rel_path }}</a>#} {# {% endfor %}#} {% endcomment %}
-
-    <h2>{{ file.id }}{{ file.name }}</h2>
-    <div onclick="show_navigation('{{ project.path }}', '{{ file.path }}')" style="text-align: center"> Navigation </div>
-    <div class="codereading">
-        {% formatText2Line project.path file.path as lines %} {% for linenum,line in lines.items %}
-        <div id="L{{ linenum }}" class="codeline" style="">
-            <div id="linenum_{{ linenum  }}" class="linenum">{{ linenum }}</div>
-
-            <div id="code_{{ linenum }}" class="sourcecode">
-                <pre class="prettyprint">{{ line|safe }}</pre>
-            </div>
-
-            <div id="linestatus_{{ linenum }}" class="linestatus">
-                {# #}
-                <span id="annonums_{{ linenum }}" class="annonums" onclick="show_annotation({{ file.id }},{{ linenum }})">
-                    {% if linenum in annos_count %} {{ annos_count|keyValue:linenum }} {% endif %}
-                </span>
-                <span id="questionums_{{ linenum }}" class="questionnums" onclick="show_question({{ file.id }},{{ linenum }})">
-                    {% if linenum in question_count %} {{ question_count|keyValue:linenum }} {% endif %}
-                </span>
-
-                <span id="addanno_{{ linenum }}" class="addanno" onclick="add_annotation({{ file.id }},{{ linenum }})"> + </span>
-            </div>
-
-        </div>
+<body id="codepanel">
+    <p class="font-18 filename">
+         {{ file.id }}{{ file.name }}&nbsp;&nbsp;&nbsp;&nbsp;
+         &nbsp;&nbsp;文件路径:
+         {% for rel_path,abs_path in path_dict.items %} /
+        <a href="{% url  'projects:source' project.name abs_path %}">{{ rel_path }}</a>
         {% endfor %}
+    </p>
+    <!-- <div onclick="show_navigation('Notes', '/src/net/micode/notes/gtask/data/TaskList.java')" style="text-align: center"> Navigation </div> -->
+    <div class="clearfix modify-all">
+
+        <div class="left">
+            <ul class="fl left-tab">
+                <li class="active">Files</li>
+                <li>Structure</li>
+            </ul>
+            <div class="fl left-rightlist" id="file-list">
+                <p class="tab-title clearfix">
+                    <label class="fl">Files</label>
+                    <font class="fr hideleft">
+                        <<</font>
+                </p>
+
+                <div id="filelist-content">
+                     {{ project_tree }}
+                </div>
+            </div>
+            <div class="fl left-rightlist" style="display:none;">
+                <p class="tab-title clearfix">
+                    <label class="fl">Structure</label>
+                    <font class="fr hideleft">
+                        <<</font>
+                </p>
+                <div id="annotation"></div>
+            </div>
+        </div>
+
+        <div class="codereading">
+            {% formatText2Line project.path file.path as lines %} 
+            {% for linenum,line in lines.items %}
+            <div id="L{{ linenum }}" class="codeline" style="">
+                <div id="linenum_{{ linenum  }}" class="linenum">{{ linenum }}</div>
+            
+                <div id="code_{{ linenum }}" class="sourcecode">
+                    <pre class="prettyprint">{{ line|safe }}</pre>
+                </div>
+            
+                <div id="linestatus_{{ linenum }}" class="linestatus">
+                    <span id="annonums_{{ linenum }}" class="annonums" onclick="show_annotation({{ file.id }},{{ linenum }})">
+                        {% if linenum in annos_count %} {{ annos_count|keyValue:linenum }} {% endif %}
+                        {% comment %}
+                        {% endcomment %} 
+                    </span>
+                    <span id="questionums_{{ linenum }}" class="questionnums" onclick="show_question({{ file.id }},{{ linenum }})">
+                        {% if linenum in question_count %} {{ question_count|keyValue:linenum }} {% endif %}
+                    </span>
+            
+                    <span id="addanno_{{ linenum }}" class="addanno" onclick="add_annotation({{ file.id }},{{ linenum }})"> + </span>
+                </div>
+            
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="right none">
+
+            <div class="show-info-panel">
+                <p class="right-name">第1行问题</p>
+                {% for linenum,line in lines.items %}
+                <div class="questions showinfo clearfix">
+                    <div class="plusnum fl">
+                        <!-- 点赞 -->
+                      <a href="javascript:void(0)" class="fa sort up" ></a>
+                      <!-- 点赞数量 -->
+                      <span class="question-count">0</span>
+                      <!--  点踩  -->
+                      <a href="javascript:void(0)" class="fa sort down"></a>
+                    </div>
+                    <div class="allinfo fr">
+                        <p class="info-p info-content">问答题:这行代码为什么能这么写？</p>
+                        <p class="info-p" style="font-size:12px;text-align:right"><a href="javascript:void(0)">蔡世</a><span>提交于2018-04-04 15:23分</span></p>
+                        
+                        {% for linenum,line in lines.items %}
+                        <div class="comment-item">
+                            <p class="comment-con">就是能这么写，自己想想就可以了</p>
+                            <p class="comment-name">----<a href="javascript:void(0)">蔡世</a></p>
+                        </div>
+                        <div class="comment-item">
+                            <p class="comment-con">就是能这么写，自己想想就可以了</p>
+                            <p class="comment-name">----<a href="javascript:void(0)">蔡世</a></p>
+                        </div>
+                        <div class="comment-item">
+                            <p class="comment-con">就是能这么写，自己想想就可以了</p>
+                            <p class="comment-name">----<a href="javascript:void(0)">蔡世</a></p>
+                        </div>
+                         {% endfor %}
+
+                        <div class="comment-btn clearfix">
+                            <a href="javascript:void(0)" class="btn fr" onclick="addcomments(this)" id="addcom">添加评论</a>
+                            <div class="comment-write clearfix none">
+                                <textarea class="writetext" placehoder="请输入评论内容"></textarea>
+                                <a href="javascript:void(0)" class="btn fr" onclick="cancelcom(this)">取消</a>
+                                <a href="javascript:void(0)" class="btn fr" style="margin-right:10px;" onclick="addcommentaction(this)">添加评论</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
     </div>
-    <div style="float: left;width: 25%; margin-left: 30px;" id="annotation"></div>
-    <div style="float: left;width: 25%; margin-left: 30px;" id="navigation"></div>
+    
+    <!-- <div style="float: left;width: 25%; margin-left: 30px;" id="navigation"></div> -->
 </body>
 
 </html>
+
