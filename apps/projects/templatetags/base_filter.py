@@ -6,10 +6,16 @@ import time
 
 
 import requests
+from users.models import User
 
 source_path = settings.SOURCEPATH
 
 
+@register.filter
+def get_username_by_id(id):
+    user = User.objects.get(id=id);
+    username = user.nick_name
+    
 #把时间戳转化为时间:
 def timeStampToTime(timestamp):
     timeStruct = time.localtime(timestamp)

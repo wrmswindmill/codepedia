@@ -3,13 +3,13 @@
   <div class="user-info ">
     <div class="user-gravatar32">
       <a href="/users/136314/flynn84">
-           <img src="{{ MEDIA_URL }}{{ user_obj.user.image }}"  class="gravatar-wrapper-32" alt="">
+           <img src="{{ MEDIA_URL }}{{ user_obj.avatar }}"  class="gravatar-wrapper-32" alt="">
       </a>
     </div>
     <div class="user-details">
-        <a href="">{{ user_obj.user.nick_name }}</a>
+        <a href="">{{ user_obj.nick_name }}</a>
         <div class="-flair">
-          <div class="user-action-time"><span class="relativetime">{{ user_obj.created }}</span>
+          <div class="user-action-time"><span class="relativetime">{{ user_obj.update_time }}</span>
           </div>
         </div>
     </div>

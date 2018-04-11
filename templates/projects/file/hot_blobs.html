@@ -1,0 +1,19 @@
+{% load base_filter %}
+<div id="hot-network-snippets" class="module">
+   <h4>
+     <a href="#">
+        Hot Network {% get_model_name hot_objs.first as model %}
+     </a>
+   </h4>
+    {% for obj in hot_objs %}
+         <div class="spacer">
+            <a>
+              <div class="answer-votes answered-accepted default">
+                  {{ obj.views }}
+              </div>
+            </a>
+
+             <a href="{% if model == 'function' %}{% url 'projects:function_detail' obj.project.id obj.file.id obj.id  %}{% else %}{% url 'projects:file_detail' obj.project.id obj.id  %}{% endif %}" class="snippet-title" >{{ obj.name|slice:"33" }}</a>
+         </div>
+    {% endfor %}
+</div>

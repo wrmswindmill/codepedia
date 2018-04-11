@@ -8,7 +8,10 @@ All Files
     <div class="container">
         <div id="content" class="snippet-hidden">
             {% include 'projects/file/mainbar.html' with obj_list=all_files model_cap='Files' %}
+            
+            {% comment %}
             {% include 'projects/file/sidebar.html' with obj_list=all_files model_cap='Files' %}
+            {% endcomment %}
         </div>
     </div>
 {% endblock %}

@@ -77,6 +77,8 @@ class File(models.Model):
     has_sonar = models.BooleanField(default=False, verbose_name='是否通过sonar获取问题')
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
+    anno_num = models.IntegerField(default=0, verbose_name='注释数量')
+    issue_num = models.IntegerField(default=0, verbose_name='注释数量')
 
     class Meta:
         db_table = 'Source_File'
@@ -97,6 +99,7 @@ class FileInfo(models.Model):
     summary = models.CharField(max_length=300, default='', verbose_name='摘要')
     note = models.TextField(default='',  verbose_name='首行注释')
 
+
     class Meta:
         db_table = 'Source_FileInfo'
         verbose_name = "文件信息"
@@ -113,6 +116,7 @@ class Watch(models.Model):
         db_table = 'Source_Watch'
         verbose_name = "源码关注"
         verbose_name_plural = verbose_name
+
 
 
 

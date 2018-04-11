@@ -1,14 +1,39 @@
+{% load staticfiles %}
 {% load static %}
-<link rel="stylesheet" href="{% static 'css/project/project.css' %}">
-<div id='mainbar' class="clear" role='main' >
-  <div class="snippet clear"   data-fileid='{{ file.id }}'>
-        {% include 'common/vote.html' with vote_obj=file %}
-      <div class="postcell">
-        {% include 'projects/common/summary.html' with summary_obj=file %}
-        {% include 'projects/common/code.html' with lines_obj=lines model='file' line_que_obj=file %}
-        {% include 'projects/common/tag.html' with tag_obj=file %}
-        {% include 'common/user_info.html' with user_obj=file %}
-      </div>
+{% load base_filter %}
+{% block custom_css %}
+     <link rel="stylesheet" type="text/css" href="{%  static 'vendor/site/css/style.css' %}">
+{% endblock %}
+<div id="mainbar">
+  <div class="subheader">
+    <h1>All Code {{ model_cap }}</h1>
+    <div id='tabs' >
+        <a href="?sort=latest">最近更新</a>
+        <a href="?sort=hot">最热代码</a>
+    </div>
   </div>
-      {% include 'qa/question.html' with question_objs=all_questions q_obj=file  model='file' %}
+  <div id="hot-tags"></div>
+  <div id='snippets'>
+        {% for obj in obj_list.object_list %}
+
+        <div class="snippet-summary" id='file-{{ obj.id }}'>
+            <!-- 这是左边的views votes questions annotations区域 -->
+            {% include 'projects/file/stats.html' with stat_obj=obj %}
+            <div class="summary">
+                <!-- 这是文件名 -->
+                <h3>
+                    <a href="{% url 'projects:source' obj.project.name obj.path  %}"  class="snippet-hyperlink">{{ obj.name }}</a>
+                </h3>
+
+                <div class="excerpt" style="color:#9fa6ad;">
+                    {{ obj.summary }}
+                </div>
+                <div class="started fr">
+                    {% include 'common/user_info.html' with user_obj=obj.project.uploader %}
+                </div>
+            </div>
+        </div>
+      {% endfor %}
+  {% include  'common/pagination.html' with page_obj=obj_list %}
+  </div>
 </div>

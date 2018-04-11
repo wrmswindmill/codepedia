@@ -5,10 +5,103 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <script src="http://apps.bdimg.com/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/code_show.css">
+    <style type="text/css">
+        .project-main {
+            width: 1200px;
+            margin: 0px auto;
+        }
+    
+        .boxshadow {
+            border: 1px solid #eee;
+            border-radius: 2px;
+        }
+    
+        .p_head {
+            background: #fff;
+            padding: 15px 0px;
+            margin-top: 20px;
+        }
+    
+        .time {
+            margin-top: 10px;
+        }
+    
+        .time label {
+            margin-right: 20px;
+        }
+    
+        .p_head_up {
+            padding: 0px 20px;
+            font-size: 15px;
+        }
+    
+        .p_detail {
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            padding: 10px 20px;
+            margin-top: 10px
+        }
+    
+        .p_info {
+            padding: 10px 20px;
+        }
+    
+        .p_infoname {
+            color: #7b7b7b;
+            margin-right: 2px
+        }
+    
+        .p_name {
+            font-size: 16px;
+            color: #33A6D6
+        }
+    
+        .project_path {
+            margin-top: 20px;
+            border: 1px solid #eee;
+            border-radius: 2px;
+        }
+    
+        .local_path {
+            font-size: 15px;
+        }
+    
+        .into_p_detail {
+            padding: 5px 10px;
+            color: #fff!important;
+            background: #33A6D6;
+            border-radius: 3px;
+        }
+    
+        .padding15 {
+            padding: 15px;
+        }
+    
+        .padding10-15 {
+            padding: 10px 15px;
+        }
+    
+        .path_title {
+            background: #eee
+        }
+    
+        .path_table {
+            border-top: 1px solid #eee;
+        }
+    
+        .path_table p {
+            height: 35px;
+            line-height: 35px;
+            border-bottom: 1px solid #eee;
+            padding: 0px 20px
+        }
+    
+        .path_table p:last-child {
+            border: none;
+        }
+    </style>
     <script type="application/javascript">
-// {#        $.ajaxSetup({#}
-// {#                data: {csrfmiddlewaretoken: '{{ csrf_token }}' },#}
-// {#            });#}
         function show_annotation(file_id, line_num) {
             $.ajax({
               cache:false,
@@ -17,37 +110,51 @@
               data:{'file_id': file_id, 'line_num': line_num, 'csrfmiddlewaretoken':'{{ csrf_token }}'},
               dataType: 'json',
               async: true,
-// {#              beforeSend:function(xhr, settings){#}
-// {#                xhr.setRequestHeader("X-CSRFToken", {% csrf_token %});#}
-// {#              },#}
+
               success:function (data) {
                   $('#annotation').html(data.msg);
                    console.log(data.msg);
-          }
+              }
           });
         }
     </script>
 </head>
+
+
 <body>
-
-    {%include 'projects/project-info.html'   %}
-    
-    当前目录:
-    {% for rel_path,abs_path in path_dict.items %}
-        /<a href="{% url  'projects:source' project.name abs_path %}">{{ rel_path }}</a>
-    {% endfor %}
-    <br>
-    {% for file in files %}
-        <a href="{% url 'projects:source' project.name file.path %}">{{ file.name }}</a>    
-        <!-- {{ project.path|getFileSize:file.path|filesizeformat }} {{ project.path|getfileCTime:file.path }}   {{ project.path|getFileMTime:file.path }} -->
-        {# 取出每个文件的注释数量#}
-        {% if file.name in annos_count %}
-            <a href="#" onclick="show_annotation({{ file.id }},0)">注释数目:{{ annos_count|keyValue:file.name }}</a>
-        {% endif %}
-        <br>
-    {% endfor %}
-    <div id="annotation">
-
+    <div class="project-main">
+        {%include 'projects/project-info.html'%}    
+        
+        <div class="project_path">
+            <div class="clearfix padding10-15 path_title">
+                <p class="fl local_path">当前路径：
+                    {% for rel_path,abs_path in path_dict.items %} /
+                    <a href="{% url  'projects:source' project.name abs_path %}">{{ rel_path }}</a>
+                    {% endfor %}
+                <p class="fr">
+                    <!-- 应该进入当前项目的项目详情页面 -->                
+                    <a href="{% url 'projects:source' project.name enter_project_url %}" class="into_p_detail">进入项目详情页</a>
+                </p>
+            </div>
+            <div class="path_table">
+                {% if parent_dir is not None  %}
+                <p>
+                    <a href="{% url 'projects:source' project.name parent_dir %}">返回上一级目录</a>
+                </p>
+                {% endif %}
+                <p>
+                    {% for file in files %}
+                        <a href="{% url 'projects:source' project.name file.path %}">{{ file.name }}</a>
+                        <!-- {{ project.path|getFileSize:file.path|filesizeformat }} {{ project.path|getfileCTime:file.path }}   {{ project.path|getFileMTime:file.path }} -->
+                        <!-- 取出每个文件的注释数量 -->
+                        {% if file.name in annos_count %}
+                            <a href="#" onclick="show_annotation({{ file.id }},0)">注释数目:{{ annos_count|keyValue:file.name }}</a>
+                        {% endif %}
+                        <br> 
+                    {% endfor %}
+                </p>
+            </div>
+        </div>
     </div>
 </body>
 

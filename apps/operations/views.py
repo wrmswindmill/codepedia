@@ -9,9 +9,10 @@ from django.core import serializers
 # Create your views here.
 
 
-from .models import Annotation, Question, Answer, Article, Issue, IssueAnswer, IssueStandardAnswers
+from .models import Annotation, Question, Answer, Article, Issue, IssueAnswer, IssueStandardAnswers, IssueChoices
 from .models import AnnotationComment, QuestionComment, AnswerComment, ArticleComment, IssueComment
 from .models import Vote
+from users.models import User
 from .forms import NewArticleForm
 from projects.models import File
 from projects.models import Language,Project
@@ -23,37 +24,59 @@ class ShowAnnotationView(View):
     """
     def post(self, request):
         # if not request.user.is_authenticated:
-        #     return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
-        # file_id = int(request.POST.get('file_id', ''))
-        # line_num = int(request.POST.get('line_num', ''))
-        file_id = 118
-        line_num = 1
+            # return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
+        file_id = int(request.POST.get('file_id', ''))
+        line_num = int(request.POST.get('line_num', ''))
+        # file_id = 118
+        # line_num = 1
         # annotations 
         annotations = Annotation.objects.filter(file_id=file_id, linenum=line_num)
         
+        # users = set()
         anno_ids = []
         for anno in annotations:
             anno_ids.append(anno.id)
+            # users.add(anno.user)
+
         anno_comments = AnnotationComment.objects.filter(annotation_id__in=anno_ids)
         anno_comments = sorted(anno_comments, key=lambda anno_comment: anno_comment.annotation_id)
 
+        # for anno_comment in anno_comments:
+        #     users.add(anno_comment.user)
+        
         anno_comments = serializers.serialize("json", anno_comments)
         annotations = serializers.serialize("json", annotations)
+
+        # 要将所有的用户和用户ID映射起来
+
+        # User.objects.f
         # print(annotations)
         # print(anno_comments)
         return HttpResponse(json.dumps({"status": "success", "annos": annotations, "anno_comments": anno_comments}), content_type='application/json')
-        # return JsonResponse(annotations, safe=False)
-
 
 class ShowQuestionView(View):
     """
        获取某一行代码所有的提问
     """
     def post(self, request):
-        file_id = int(request.POST.get('file_id', ''))
-        line_num = int(request.POST.get('line_num', ''))
-        questions = Question.objects.filter(file_id=file_id, linenum=line_num)
-        questions = serializers.serialize("json", questions)
+        # file_id = int(request.POST.get('file_id', ''))
+        # line_num = int(request.POST.get('line_num', ''))
+        # questions = Issue.objects.filter(file_id=file_id, linenum=line_num)
+        # questions = serializers.serialize("json", questions)
+
+        issue_id_type = request.POST.get('issue_id_type', '')
+        issue_id_type = issue_id_type[1:len(issue_id_type)-1]
+        
+        list1 = issue_id_type.split(",")
+
+        issue_ids=[]
+        for i in range(0,len(list1),2):
+            issue_ids.append(list1[i])
+
+        issues = Issue.objects.filter(id__in=issue_ids)   
+        issueChoices = IssueChoices.objects.filter(issue__in=issues)
+        issues = serializers.serialize("json", issues)
+        issueChoices = serializers.serialize("json",issueChoices)
 
         # question_ids = []
         # for question in questions:
@@ -63,7 +86,7 @@ class ShowQuestionView(View):
         # question_comments = sorted(
         #     question_comments, key=lambda question_comment: question_comments.question_id)
 
-        return HttpResponse(json.dumps({"status": "success", "msg": questions}), content_type='application/json')
+        return HttpResponse(json.dumps({"status": "success", "issues":issues,"issueChoices":issueChoices}), content_type='application/json')
 
 
 class ShowNavigationView(View):
@@ -74,6 +97,7 @@ class ShowNavigationView(View):
         navigation_url = settings.OPENGROK_NAVIGATION_URL
         project_path = request.POST.get('project_path', '')
         file_path = request.POST.get('file_path', '')
+        print(file_path)
         navigation_url = navigation_url +project_path + file_path
         response = requests.get(navigation_url).text
         
@@ -85,7 +109,7 @@ class ShowNavigationView(View):
                 symbol = json.loads(symbol)
                 del symbol[1]
                 all_symbols.append(symbol)
-            print(all_symbols)
+            # print(all_symbols)
             return HttpResponse(json.dumps({"status": "success", "msg": all_symbols}), content_type='application/json')
         else:
             return HttpResponse(json.dumps({"status": "failed", "msg": 'null'}), content_type='application/json')
@@ -124,7 +148,8 @@ class ShowMethodInfo(View):
                 return HttpResponse(json.dumps({"status": "success", "msg": results, "url": settings.OPENGROK_NAVIGATION_URL}), content_type='application/json')
         return HttpResponse(json.dumps({"status": "failed", "msg": []}), content_type='application/json')
 
-
+# FIXME
+# 还没有获取用户id，需要从request中获取用户id
 class AddAnnotationView(View):
     """
        为某行代码添加注释
@@ -132,7 +157,9 @@ class AddAnnotationView(View):
     def post(self, request):
         # if not request.user.is_authenticated():
         #     return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
+        print(request)
         content = request.POST.get('content', '')
+        print(content)
         file_id = int(request.POST.get('file_id', ''))
         linenum = int(request.POST.get('linenum', ''))
         if int(file_id) > 0 and content:
@@ -140,7 +167,7 @@ class AddAnnotationView(View):
             # exist_record = Annotation.objects.filter(file_id=file_id, linenum=linenum, user_id=request.user.id)
             exist_record = Annotation.objects.filter(file_id=file_id, linenum=linenum, user_id=1)
             if exist_record:
-                return HttpResponse('{"status":"success","msg":"你已经添加过注释，无法再次添加"}', content_type='application/json')
+                return HttpResponse('{"status":"fail","msg":"你已经添加过注释，无法再次添加"}', content_type='application/json')
             else:
                 try:
                     annotation = Annotation()
@@ -172,7 +199,7 @@ class UpdateAnnotationView(View):
         annotation.save()
         return HttpResponse('{"status":"success","msg":"修改成功"}', content_type='application/json')
 
-
+# FIXME
 class AddQuestionView(View):
     def post(self, request):
         # if not request.user.is_authenticated():
@@ -181,7 +208,7 @@ class AddQuestionView(View):
         file_id = request.POST.get('file_id', '')
         linenum = request.POST.get('linenum', '')
         if int(file_id) > 0 and content:
-            question = Question()
+            question = Issue()
             question.content = content
             # question.user = request.user
             question.user_id = 1
@@ -270,13 +297,16 @@ class UpdateArticleView(View):
         except Exception as e:
             return HttpResponse('{"status":"fail","msg":"参数传递错误，更新失败"}', content_type='application/json')
 
-
+#FIXME
+#用户现在默认为id=1的用户，需要修改
+#1.request。user.is_authenticated()
+#2.comment.user
 class AddCommentView(View):
     def post(self, request):
-        if not request.user.is_authenticated():
-            return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
+        # if not request.user.is_authenticated():
+        #     return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
         content = request.POST.get('content', '')
-        type = request.POST.get('type', '')
+        type = request.POST.get('type', '')        
         object_id = int(request.POST.get('object_id', ''))
         if object_id > 0 and content:
             try:
@@ -302,10 +332,13 @@ class AddCommentView(View):
                     comment.article_id = article.id
                 else:
                     return HttpResponse('{"status":"fail","msg":"参数传递错误，无法找到评论对象"}', content_type='application/json')
+            
             except Exception as e:
                 return HttpResponse('{"status":"fail","msg":"参数传递错误，评论失败"}', content_type='application/json')
+            
             comment.content = content
-            comment.user = request.user
+            # comment.user = request.user
+            comment.user = User.objects.get(id=1)
             comment.save()
             return HttpResponse('{"status":"success","msg":"评论成功"}', content_type='application/json')
         else:

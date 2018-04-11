@@ -1,11 +1,26 @@
-项目名：{{ project.name }}<br>
-项目描述：{{ project.desc }}<br> 
-Github地址:{{project.github}}<br> 
-Ossean地址：{{project.ossean}}<br> 
-编程语言:{{project.language.name}}<br> 
-文件数量:{{project.files}}<br> 
-点击数量:{{project.views}}<br> 
-创建时间:{{project.create_time}}<br> 
-更新时间：{{project.update_time}}<br>
 
-<br><br><br>
+    <div class="p_head boxshadow">
+        <div class="p_head_up">
+            <p class="clearfix">
+                <label class="fl p_name">{{ project.name }}</label>
+                <label class="fr">
+                    <span class="p_infoname">编程语言:</span>{{project.language.name}}</label>
+            </p>
+        </div>
+        <div class="p_detail">
+            <span class="p_infoname">项目描述:</span>{{ project.desc }}
+        </div>
+        <div class="p_info">
+            <p class="time">
+                <span class="p_infoname">Github地址:</span><a href="{{project.github}}">{{project.github}}</a></p>
+            <p class="time">
+                <span class="p_infoname">Ossean地址：</span><a href="{{project.ossean}}">{{project.ossean}}</a></p>
+            <p class="time">
+                <label><span class="p_infoname">创建时间:</span>{{project.create_time}}</label>
+                <label><span class="p_infoname">更新时间:</span>{{project.update_time}}</label>         
+                {# <label><span class="p_infoname">文件数量:</span>{{project.files}}</label> #}
+                {# <label><span class="p_infoname">点击数量:</span>{{project.views}}</label> #}
+                
+            </p>
+        </div>
+    </div>

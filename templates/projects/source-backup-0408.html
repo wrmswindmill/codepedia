@@ -1,0 +1,423 @@
+
+{% load base_filter %} {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <!-- <script type="application/javascript" src="/static/js/jquery-3.3.1.min.js"></script> -->
+    <script type="application/javascript" src="/static/js/prettify.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/prettify.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/code_show.css">
+    <title>{{ project.name }}-{{ project.desc }}</title>
+    <script type="application/javascript">
+
+        var flag=true;//左侧默认显示
+
+        function show_annotation(file_id, line_num) {
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: '/operations/show_annotation/',
+                data: { 'file_id': file_id, 'line_num': line_num },
+                dataType: 'json',
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
+                },
+                success: function (data) {
+                    var annos = JSON.parse(data.annos);
+                    var anno_comments = JSON.parse(data.anno_comments);
+                    var html_str = '<p class="right-name">第'+line_num+'行注释</p>';
+                    var j = 0;
+                    $.each(annos, function (index, anno_content) {
+                        // console.log(anno_content);
+                        // console.log(anno_content.fields['vote']);
+                        html_str+=
+                        '<div class="questions showinfo clearfix">'+
+                            //左侧点赞区域
+                            '<div class="plusnum fl">'+
+                                '<a href="javascript:void(0)" class="fa sort up"></a>'+
+                                '<!--点赞数量 -->'+
+                                '<span class="question-count">'+anno_content.fields['vote']+'</span>'+
+                                '<!--点踩  -->'+
+                                '<a href="javascript:void(0)" class="fa sort down"></a>'+
+                            '</div>'+
+                            //中间问题内容区域
+                            '<div class="allinfo fr">'+
+                                '<p class="info-p info-content">'+anno_content.fields['content']+'</p>'+
+                                '<p class="info-p" style="font-size:12px;text-align:right">'+
+                                    '<a href="javascript:void(0)">'+anno_content.fields['user']+'</a>'+
+                                    '<span>'+anno_content.fields['update_time']+'</span>'+
+                                '</p>'+
+                                //问题对应的评论区域
+                                '<div class="comment-item">'+
+                                    '<p class="comment-con">就是能这么写，自己想想就可以了</p>'+
+                                    '<p class="comment-name">----'+
+                                        '<a href="javascript:void(0)">蔡世</a>'+
+                                    '</p>'+
+                                '</div>'+
+                                //评论框
+                                '<div class="comment-btn clearfix">'+
+                                    '<a href="javascript:void(0)" class="btn fr" onclick="addcomments(this)" id="addcom">添加评论</a>'+
+                                    '<div class="comment-write clearfix none">'+
+                                        '<textarea class="writetext" placehoder="请输入评论内容"></textarea>'+
+                                        '<a href="javascript:void(0)" class="btn fr" onclick="cancelcom(this)">取消</a>'+
+                                        '<a href="javascript:void(0)" class="btn fr" style="margin-right:10px;" onclick="addcommentaction(this)">添加评论</a>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>' +
+                        '</div>';
+
+                        // console.log(html_str);
+                    });
+                    $(".show-info-panel").html(html_str);
+
+                    var left = ($(".left").width());
+                    if (flag) {
+                        $(".codereading").css("width", "60%");
+                    } else {
+                        var wid = $(".codereading").width();
+                        $(".codereading").css("width", wid - (left * 2) + "px");
+                    }
+                    $(".right").removeClass("none");
+                }
+            });
+        }
+
+
+        function show_question(file_id, line_num) {
+           
+            /*var tbody = "";
+            //------------取出该行代码的annotation-------------
+            var obj = JSON.parse(data.msg);
+
+            $("#annotation").html("-----------该行代码的所有问题----------<br>");
+            //下面使用each进行遍历
+            $.each(obj, function (index, value) {
+                console.log(value);
+                var trs = '';
+                trs += (index + 1) + "    :  <br>" +
+                    "&nbsp;&nbsp;&nbsp;question_id: " + value.pk + "<br>" +
+                    "&nbsp;&nbsp;&nbsp;content:  " + value.fields['content'] + "<br>" +
+                    "&nbsp;&nbsp;&nbsp;user_id:  " + value.fields['user'] + "<br>";
+                $("#annotation").append(trs)
+
+            });*/
+            var left=($(".left").width());
+            if(flag){
+                $(".codereading").css("width","60%");
+            }else{
+                var wid=$(".codereading").width();
+                $(".codereading").css("width",wid-(left*2)+"px");
+            }
+            $(".right").removeClass("none");
+        }
+
+
+        function add_annotation(file_id, line_num) {
+            //$("#annotation").html("------您将在此处为第" + line_num + "行代码添加注释或者问题-------")
+            // 获取当前是注释还是问题
+            var select_context="#addno-select-"+line_num+" option:selected";
+            console.log(select_context);
+            var options = $(select_context);  //获取选中的项
+            console.log(options)
+            // javascript获取select的值
+            // 获取内容
+            // 提交
+        }
+
+        function show_add_annotation(item) {
+            $(item).siblings("#addno-panel").show()
+        }
+
+        function search_symbol(args) {
+                $.ajax({
+                cache: false,
+                type: "POST",
+                url: '/operations/show_method_info/',
+                data: { 'args': args },
+                dataType: 'json',
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
+                },
+                success: function (data) {
+                    if (data.status === 'success') {
+                        var obj = data.msg;
+                        var context = "";
+                        console.log(obj);
+                        for (let i = 0; i < obj.length; i++) {
+                            var filePath = obj[i]['path'];
+                            var filePathTag = "<a href=\"/projects" + filePath + "\">" + filePath + "</a>";
+                            var code = window.atob(obj[i]['line'])
+                            var lineno = obj[i]['lineno']
+                            var codeTag = "<a href=\"/projects" + filePath + "#L" + lineno + "\">" + code + "</a>";
+                            context += (i + 1) + ".  " + filePathTag + "&nbsp;&nbsp;&nbsp;&nbsp;" + codeTag + "<br>";
+                        }
+                        console.log(context);
+                        $("#annotation").html(context);
+                    }
+                }
+            });
+        }
+
+
+
+        function show_navigation(project_path, file_path) {
+
+		        $.ajax({
+                cache: false,
+                type: "POST",
+                url: '/operations/show_navigation/',
+                data: { 'project_path': project_path, 'file_path': file_path },
+                dataType: 'json',
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{  csrf_token}}');
+                },
+
+                success: function (data) {
+                    if (data.status === 'success') {
+                        var content = "";
+                        var obj = data.msg;
+                        console.log(obj);
+                        for (let i = 0; i < obj.length; i++) {
+                            var type = obj[i][0];
+                            var str = '';
+                            str += "<div id=" + type + ">";
+                            str += "<div class='tags'>" + type + "</div>";
+                            if (obj.length > 1) {
+                                var items = obj[i][1];
+                                for (let j = 0; j < items.length; j++) {
+                                    var name = items[j][0];
+                                    var linenum = items[j][1];
+                                    str += "<a class='def' href='#L" + linenum + "'>" + name + "</a><br>" + "</div>";
+                                }
+                            }
+                            str += "</div>";
+                            content += str;
+                        }
+                        $("#annotation").html(content)
+                    }
+                    else {
+                        $("#annotation").html(data.msg)
+                    }
+                }
+            });
+        }
+
+        $(function(){
+            $("body").click(function(event){
+                //点击页面隐藏弹出框
+                if($("#addno-panel").css("display")=="block"){
+                    if($(event.target).parents().attr("id")=="addno-panel" || $(event.target).attr("id")=="addno-panel" || $(event.target).attr("class")=="put-option" || $(event.target).attr("class")=="put-text" || $(event.target).attr("id")=="submit" || $(event.target).attr("class")=="addanno-img"){
+                        return;
+                    }
+                    $("#addno-panel").hide();
+                }
+            })
+            $("#filelist-content .item").click(function(){
+                if($(this).siblings(".sub-item").length>0 && $(this).attr("show")=="0"){
+                    $(this).siblings(".sub-item").show();
+                    $(this).attr("show","1");
+                }else if($(this).attr("show")=="1"){
+                    $(this).siblings(".sub-item").hide();
+                    $(this).attr("show","0");
+                }
+            })
+
+            $(".left-tab li").click(function(){
+                $(".left-tab li").removeClass("active");
+                $(this).addClass("active");
+                $(".left-rightlist").hide();
+                $(".left-rightlist").eq($(this).index()).show();
+
+                if(flag == false){
+                    $(".codereading").css("width","80%");
+                    $(".left").animate({"width":"20%"},1000);
+                }
+            })
+
+            /*隐藏左侧部分*/
+            $(".hideleft").click(function(){
+                var wid=$(".left").width();
+                $(".left").animate({"width":"70px"},800);
+                $(".left-tab li").removeClass("active");
+                $(".codereading").width(parseInt($(".codereading").width())+wid);
+                flag =false;
+            })
+
+            $(".up").bind("click",function(){
+                Console.log("11123123112321312")
+                var count=$(this).siblings(".question-count").html();
+                if($(this).siblings(".down").hasClass("active")){
+                    $(".up,.down").removeClass("active");
+                    $(this).siblings(".question-count").html(parseInt(count)+1);
+                }else{
+                    if($(this).hasClass("active")){
+                        $(this).removeClass("active");
+                        $(this).siblings(".question-count").html(parseInt(count)-1);
+                    }else{
+                        $(this).siblings(".down").removeClass("active");
+                        $(this).addClass("active");
+                        $(this).siblings(".question-count").html(parseInt(count)+1);
+                    }
+                }
+            })
+
+            $(".down").bind("click",function(){
+                var count=$(this).siblings(".question-count").html();
+
+                if($(this).siblings(".up").hasClass("active")){
+                    $(".up,.down").removeClass("active");
+                    $(this).siblings(".question-count").html(parseInt(count)-1);
+                }else{
+                    if($(this).hasClass("active")){
+                        $(this).removeClass("active");
+                        $(this).siblings(".question-count").html(parseInt(count)+1);
+                    }else{
+                        $(this).siblings(".down").removeClass("active");
+                        $(this).addClass("active");
+                        $(this).siblings(".question-count").html(parseInt(count)-1);
+                    }
+                }
+            })
+        })
+        function addcomments(item){
+            $(item).siblings(".comment-write").removeClass("none");
+            $(item).addClass("none");
+        }
+
+        function cancelcom(item){
+            $(item).parents(".comment-write").siblings("#addcom").removeClass("none");
+            $(item).parents(".comment-write").addClass("none");
+        }
+        //添加评论
+        function addcommentaction(item){
+            var txt=$(item).siblings(".writetext").val();
+            if(txt ==""){
+                confirm("请输入评论内容");
+                return;
+            }
+            var html="";
+            html+="<div class=\"comment-item\">";
+            html+="<p class=\"comment-con\">"+txt+"</p>";
+            html+="<p class=\"comment-name\">----<a href=\"javascript:void(0)\">蔡世</a></p></div>";
+            $(item).parents(".comment-btn").before(html);
+            $(item).parents(".comment-btn").find(".comment-write").addClass("none");
+            $(item).parents(".comment-btn").find("#addcom").removeClass("none");
+            $(item).siblings(".writetext").val("");
+        }
+    </script>
+
+</head>
+
+<body id="codepanel">
+    <p class="font-18 filename">
+         {{ file.name }}&nbsp;&nbsp;&nbsp;&nbsp;
+         &nbsp;&nbsp;文件路径:
+         {% for rel_path,abs_path in path_dict.items %} /
+        <a href="{% url  'projects:source' project.name abs_path %}">{{ rel_path }}</a>
+        {% endfor %}
+    </p>
+    <!-- <div onclick="show_navigation('Notes', '/src/net/micode/notes/gtask/data/TaskList.java')" style="text-align: center"> Navigation </div> -->
+    <div class="clearfix modify-all">
+        <!-- 左侧结构树区域 -->
+        <div class="left">
+            <ul class="fl left-tab">
+                <li class="active">Files</li>
+                <li onclick="show_navigation('{{ project.path }}', '{{ file.path }}')">Structure</li>
+            </ul>
+
+            <div class="fl left-rightlist" id="file-list">
+                <p class="tab-title clearfix">
+                    <label class="fl">Files</label>
+                    <font class="fr hideleft">
+                        <<</font>
+                </p>
+
+                <div id="filelist-content">
+                     {{ project_tree | safe }}
+                </div>
+            </div>
+
+            <div class="fl left-rightlist" style="display:none;">
+                <p class="tab-title clearfix">
+                    <label class="fl">Structure</label>
+                    <font class="fr hideleft">
+                        <<</font>
+                </p>
+                <div id="annotation"></div>
+            </div>
+        </div>
+        <!-- 中间代码块区域 -->
+        <div class="codereading">
+            {% formatText2Line project.path file.path as lines %} 
+            {% for linenum,line in lines.items %}
+            <div id="L{{ linenum }}" class="codeline" style="">
+                <div id="linenum_{{ linenum  }}" class="linenum">{{ linenum }}</div>
+            
+                <div id="code_{{ linenum }}" class="sourcecode">
+                    <pre class="prettyprint">{{ line|safe }}</pre>
+                </div>
+            
+                <div id="linestatus_{{ linenum }}" class="linestatus">
+                    <span id="annonums_{{ linenum }}" class="annonums" onclick="show_annotation({{ file.id }},{{ linenum }})">
+                        {% if linenum in annos_count %} {{ annos_count|keyValue:linenum }} {% endif %}
+                    </span>
+
+                    <span id="questionums_{{ linenum }}" class="questionnums" onclick="show_question({{ file.id }},{{ linenum }})">
+                        {% if linenum in question_count %} {{ question_count|keyValue:linenum }} {% endif %}
+                    </span>
+
+                    <span id="addanno_{{ linenum }}" class="addanno" onclick="show_add_annotation(this)">
+                        <img src="/static/image/add.png" class="addanno-img" height="16" width="20" />
+                    </span>
+
+                    <div class="addno-panel" id="addno-panel">
+                        <div class="trangle-op"></div>
+                        <div class="put-content">
+                                <select id="addno-select-{{ linenum }}"class="put-option">
+                                    <option>注释</option>
+                                    <option>问题</option>
+                                </select>
+                                <textarea id="addno-text-{{ linenum }}"class="put-text" placeholder="输入注释或者问题"> </textarea>
+                                <a href="add_annotation({{ file.id }},{{ linenum }})" class="submit fr" id="submit">提交</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            
+            </div>
+            {% endfor %}
+        </div>
+
+
+
+        <div class="addno-panel" id="addno-panel">
+            <div class="trangle-op"></div>
+            <div class="put-content">
+                <select class="put-option">
+                    <option>注释</option>
+                    <option>问题</option>
+                </select>
+                <textarea class="put-text" placeholder="输入注释或者问题"> </textarea>
+                <a href="javascript:void(0)" class="submit fr" id="submit">提交</a>
+            </div>
+        </div>
+
+        <!-- 右侧问题注释区域 -->
+        <div class="right none">
+
+            <div class="show-info-panel"> 
+            </div>
+        </div>
+    </div>
+    
+    <!-- <div style="float: left;width: 25%; margin-left: 30px;" id="navigation"></div> -->
+</body>
+
+</html>
+
