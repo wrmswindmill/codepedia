@@ -1,7 +1,7 @@
 from django.db import models
 from users.models import User
-from operations.models import Question, Answer, Article, Annotation, Issue, IssueAnswer
-from operations.models import QuestionComment, AnswerComment, ArticleComment, AnnotationComment, IssueComment
+from operations.models import Question, QuestionAnswer, Article, Annotation, Issue, IssueAnswer
+from operations.models import QuestionComment, QuestionAnswerComment, ArticleComment, AnnotationComment, IssueComment
 
 # Create your models here.
 

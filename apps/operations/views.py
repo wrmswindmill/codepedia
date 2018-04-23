@@ -9,13 +9,14 @@ from django.core import serializers
 # Create your views here.
 
 
-from .models import Annotation, Question, Answer, Article, Issue, IssueAnswer, IssueStandardAnswers, IssueChoices
-from .models import AnnotationComment, QuestionComment, AnswerComment, ArticleComment, IssueComment
+from .models import Annotation, Question, QuestionAnswer, Article, Issue, IssueAnswer, IssueStandardAnswers, IssueChoices
+from .models import AnnotationComment, QuestionComment, QuestionAnswerComment, ArticleComment, IssueComment
 from .models import Vote
 from users.models import User
 from .forms import NewArticleForm
 from projects.models import File
 from projects.models import Language,Project
+from django.template.loader import render_to_string
 
 
 class ShowAnnotationView(View):
@@ -41,42 +42,45 @@ class ShowAnnotationView(View):
         anno_comments = AnnotationComment.objects.filter(annotation_id__in=anno_ids)
         anno_comments = sorted(anno_comments, key=lambda anno_comment: anno_comment.annotation_id)
 
-        # for anno_comment in anno_comments:
-        #     users.add(anno_comment.user)
-        
-        anno_comments = serializers.serialize("json", anno_comments)
-        annotations = serializers.serialize("json", annotations)
+        html_str = render_to_string('projects/filesub/annotation.html', {'linenum':line_num,'annos': annotations,"anno_comments":anno_comments})
+        # print(html_str)
+        return HttpResponse(json.dumps({"status": "success","html_str":html_str}), content_type='application/json')
 
-        # 要将所有的用户和用户ID映射起来
-
-        # User.objects.f
-        # print(annotations)
-        # print(anno_comments)
-        return HttpResponse(json.dumps({"status": "success", "annos": annotations, "anno_comments": anno_comments}), content_type='application/json')
-
-class ShowQuestionView(View):
+class ShowIssueView(View):
     """
        获取某一行代码所有的提问
     """
     def post(self, request):
         # file_id = int(request.POST.get('file_id', ''))
-        # line_num = int(request.POST.get('line_num', ''))
-        # questions = Issue.objects.filter(file_id=file_id, linenum=line_num)
-        # questions = serializers.serialize("json", questions)
+        line_num = request.POST.get('line_num', '')
+        print(line_num)
 
         issue_id_type = request.POST.get('issue_id_type', '')
         issue_id_type = issue_id_type[1:len(issue_id_type)-1]
-        
+
         list1 = issue_id_type.split(",")
 
-        issue_ids=[]
-        for i in range(0,len(list1),2):
+        issue_ids = []
+        for i in range(0, len(list1), 2):
             issue_ids.append(list1[i])
 
-        issues = Issue.objects.filter(id__in=issue_ids)   
+        issues = Issue.objects.filter(id__in=issue_ids)
         issueChoices = IssueChoices.objects.filter(issue__in=issues)
-        issues = serializers.serialize("json", issues)
-        issueChoices = serializers.serialize("json",issueChoices)
+        issueAnswers = IssueAnswer.objects.filter(issue__in=issues, user_id=1)
+        # print(issueAnswer)
+        issueStandardAnswer = IssueStandardAnswers.objects.filter(
+            issue__in=issues)
+
+        comments = IssueComment.objects.filter(issue__in=issues)
+        print(issueStandardAnswer)
+        print(comments)
+        # issues = serializers.serialize("json", issues)
+        # issueChoices = serializers.serialize("json",issueChoices)
+
+        html_str = render_to_string('projects/filesub/question.html', {'linenum': line_num, 'issues': issues, 'issueChoices': issueChoices,
+                                                                       'issueAnswers': issueAnswers, 'issueStandardAnswer': issueStandardAnswer, 'comments': comments})
+        print(html_str)
+        return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
 
         # question_ids = []
         # for question in questions:
@@ -86,9 +90,26 @@ class ShowQuestionView(View):
         # question_comments = sorted(
         #     question_comments, key=lambda question_comment: question_comments.question_id)
 
-        return HttpResponse(json.dumps({"status": "success", "issues":issues,"issueChoices":issueChoices}), content_type='application/json')
+        return HttpResponse(json.dumps({"status": "success", "issues": issues, "issueChoices": issueChoices}), content_type='application/json')
 
 
+class ShowQuestionView(View):
+    def post(self, request):
+        line_num = request.POST.get('line_num', '')
+        file_id = request.POST.get('file_id', '')
+
+        questions = Question.objects.filters(file_id=file_id,line_num=line_num)
+        answers =QuestionAnswer.objects.filters(question__in=questions)
+        comments = QuestionAnswerComment.objects.filters(answer__in=answers)
+        # issues = serializers.serialize("json", issues)
+        # issueChoices = serializers.serialize("json",issueChoices)
+
+        # html_str = render_to_string('projects/filesub/question.html', {'linenum': line_num, 'issues': issues, 'issueChoices': issueChoices,
+                                                                        # 'issueAnswers': issueAnswers, 'issueStandardAnswer': issueStandardAnswer, 'comments': comments})
+        # print(html_str)
+        # return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
+
+    
 class ShowNavigationView(View):
     """
        获取当前文件的Structure，也就是Package,Class，Method信息。
@@ -114,6 +135,7 @@ class ShowNavigationView(View):
         else:
             return HttpResponse(json.dumps({"status": "failed", "msg": 'null'}), content_type='application/json')
 
+
 class ShowMethodInfo(View):
     """
         获取当前方法的具体信息
@@ -135,7 +157,7 @@ class ShowMethodInfo(View):
                     languageObj=Language.objects.filter(name=project.language).first()
                     if languageObj is not None:
                         query_str+= "&project="+languageObj.src
-
+        print(query_str)
         url = method_query_url+query_str
         query_result = requests.get(url).text
         print(query_result)
@@ -155,8 +177,8 @@ class AddAnnotationView(View):
        为某行代码添加注释
     """
     def post(self, request):
-        # if not request.user.is_authenticated():
-        #     return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
+        if not request.user.is_authenticated:
+            return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
         print(request)
         content = request.POST.get('content', '')
         print(content)
@@ -165,7 +187,7 @@ class AddAnnotationView(View):
         if int(file_id) > 0 and content:
             # 看用户是否已经添加过注释
             # exist_record = Annotation.objects.filter(file_id=file_id, linenum=linenum, user_id=request.user.id)
-            exist_record = Annotation.objects.filter(file_id=file_id, linenum=linenum, user_id=1)
+            exist_record = Annotation.objects.filter(file_id=file_id, linenum=linenum, user_id=request.user.id)
             if exist_record:
                 return HttpResponse('{"status":"fail","msg":"你已经添加过注释，无法再次添加"}', content_type='application/json')
             else:
@@ -176,8 +198,8 @@ class AddAnnotationView(View):
                     annotation.linenum = linenum
                     annotation.project_id = file.project_id
                     annotation.content = content
-                    # annotation.user = request.user
-                    annotation.user_id = 1
+                    annotation.user = request.user
+                    # annotation.user_id = 1
                     annotation.save()
                     return HttpResponse('{"status":"success","msg":"注释成功"}', content_type='application/json')
                 except Exception as e:
@@ -199,19 +221,20 @@ class UpdateAnnotationView(View):
         annotation.save()
         return HttpResponse('{"status":"success","msg":"修改成功"}', content_type='application/json')
 
-# FIXME
+#FIXME
 class AddQuestionView(View):
     def post(self, request):
-        # if not request.user.is_authenticated():
-        #     return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
+        if not request.user.is_authenticated:
+            return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
+        
         content = request.POST.get('content', '')
         file_id = request.POST.get('file_id', '')
         linenum = request.POST.get('linenum', '')
         if int(file_id) > 0 and content:
-            question = Issue()
+            question = Question()
             question.content = content
-            # question.user = request.user
-            question.user_id = 1
+            question.user = request.user
+            # question.user_id = 1
             question.linenum = linenum
             question.file_id = file_id
             file = File.objects.filter(id=file_id)
@@ -240,20 +263,24 @@ class UpdateQuestionView(View):
 
 class AddAnswerView(View):
     def post(self, request):
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
         content = request.POST.get('content', '')
-        question_id = request.POST.get('question_id', '')
-        if int(question_id) > 0 and content:
+        issue_id = request.POST.get('issue_id', '')
+
+        if int(issue_id) > 0 and content:
+            exist_record = IssueAnswer.objects.filter(issue_id=issue_id,user_id=1)
+            if exist_record:
+                 return HttpResponse('{"status":"fail","msg":"您已回到过问题了"}', content_type='application/json')
             try:
-                answer = Answer()
-                question = Question.objects.get(id=question_id)
-                answer.question_id = question.id
+                answer = IssueAnswer()
+                issue = Issue.objects.get(id=issue_id)
+                answer.issue_id = issue.pk
                 answer.content = content
                 answer.user = request.user
                 answer.save()
-                answer = serializers.serialize("json", [answer, ])
-                return HttpResponse(json.dumps({"status": "success", "answer": answer}),
+                answer = serializers.serialize("json", [answer,])
+                return HttpResponse(json.dumps({"status": "success","msg":"回答成功", "answer": answer}),
                                 content_type='application/json')
             except Exception as e:
                 return HttpResponse('{"status":"fail","msg":"参数传递错误，回答失败"}', content_type='application/json')
@@ -297,27 +324,22 @@ class UpdateArticleView(View):
         except Exception as e:
             return HttpResponse('{"status":"fail","msg":"参数传递错误，更新失败"}', content_type='application/json')
 
-#FIXME
-#用户现在默认为id=1的用户，需要修改
-#1.request。user.is_authenticated()
-#2.comment.user
+
 class AddCommentView(View):
     def post(self, request):
-        # if not request.user.is_authenticated():
-        #     return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
+        if not request.user.is_authenticated:
+            return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
+        # print(11111)
         content = request.POST.get('content', '')
         type = request.POST.get('type', '')        
         object_id = int(request.POST.get('object_id', ''))
+        print(content,type,object_id)
         if object_id > 0 and content:
             try:
                 if type == 'annotation':
                     comment = AnnotationComment()
                     annotation = Annotation.objects.get(id=object_id)
                     comment.annotation_id = annotation.id
-                elif type == 'question':
-                    comment = QuestionComment()
-                    question = Question.objects.get(id=object_id)
-                    comment.question_id = question.id
                 elif type == 'issue':
                     comment = IssueComment()
                     issue = Issue.objects.get(id=object_id)
@@ -332,15 +354,13 @@ class AddCommentView(View):
                     comment.article_id = article.id
                 else:
                     return HttpResponse('{"status":"fail","msg":"参数传递错误，无法找到评论对象"}', content_type='application/json')
-            
             except Exception as e:
                 return HttpResponse('{"status":"fail","msg":"参数传递错误，评论失败"}', content_type='application/json')
             
             comment.content = content
-            # comment.user = request.user
-            comment.user = User.objects.get(id=1)
+            comment.user = request.user
             comment.save()
-            return HttpResponse('{"status":"success","msg":"评论成功"}', content_type='application/json')
+            return HttpResponse(json.dumps({"status":"success","msg":"评论成功","username":comment.user.nick_name}), content_type='application/json')
         else:
             return HttpResponse('{"status":"fail","msg":"评论失败"}', content_type='application/json')
 
@@ -503,3 +523,44 @@ class AcceptAnswerView(View):
                 return HttpResponse('{"status":"fail","msg":"没有找到对象"}', content_type='application/json')
         else:
             return HttpResponse('{"status":"fail","msg":"参数传递错误"}', content_type='application/json')
+
+#TODO
+#目前Hotest问题是针对所有回答了的问题而言的
+#如果回答数量不够，那么按照更新时间排序
+class GetHotestIssuesView(View):
+    def post(self, request):
+        num = request.POST.get("question_num");
+        path = request.POST.get("path")
+        project_id = request.POST.get("project_id")
+        file_type = request.POST.get("file_type")
+        #获取对应的问题
+        # 如果是文件级别的，直接获取当前文件的即可
+        if file_type=='file':
+            file = File.objects.get(path="%s"%(path))
+            file_id =file.pk
+            issues = Issue.objects.filter(file_id=file_id)
+        # 如果是根目录级别的，也可以直接获取所有文件的
+        elif file_type=='rootdir':
+            issue = Issue.object.filter(project_id=project_id)
+        # 否则就是普通目录级别了
+        else:
+            # 根据path获取当前path下所有的文件的FileId
+            file_ids = set()
+            for file in File.objects.filter(path__startswith="%s"%(path)):
+                file_ids.add(file.pk)
+            # 获取当前项目的所有问题
+            issues = Issue.objects.filter(file_id__in=file_ids)
+        
+        # #获取当前项目所有回答过问题的题目
+        # #可能会有问题
+        # issue_answers = IssueAnswer.objects.filter(project_id=project_id).values('issue_id').annotate(nums=Count('issue_id')).order_by('nums')
+        # for issue in issue_answers:
+        #     if issue.issue_id in 
+
+        # 排序
+        if len(issues)>num:
+            issues = issues[0:num]
+        html_str = render_to_string('projects/filesub/hotProject.html', {'issues':issues})
+        print(html_str)
+        return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
+

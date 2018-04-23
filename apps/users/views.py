@@ -14,6 +14,7 @@ import requests
 
 from .models import User, EmailVerifyRecord
 from .forms import LoginForm,RegisterForm
+import utils.scanner_project as scanner
 
 
 # Create your views here.
@@ -164,6 +165,7 @@ class UserInfoView(View):
 
 class IndexView(View):
     def get(self,request):
+        scanner.get_anno_issue_summary("/opt/opengrok/source/Notes",1)
         return render(request, 'index.html', {})
 
 

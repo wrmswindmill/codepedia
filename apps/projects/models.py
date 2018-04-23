@@ -3,6 +3,7 @@ from users.models import User
 # Create your models here.
 
 
+
 class Language(models.Model):
     name = models.CharField(max_length=50, verbose_name='编程语言')
     create_time = models.DateTimeField(auto_now_add=True)
@@ -117,6 +118,20 @@ class Watch(models.Model):
         verbose_name = "源码关注"
         verbose_name_plural = verbose_name
 
+
+class FileAnnoIssueSummary(models.Model):
+    project = models.ForeignKey(
+        Project, verbose_name='文件', on_delete=models.CASCADE)
+    file = models.ForeignKey(File, verbose_name='文件', on_delete=models.CASCADE)
+    anno_num = models.IntegerField(default=0, verbose_name='注释总数')
+    isuue_num = models.IntegerField(default=0, verbose_name='问题总数')
+
+    parent_path = models.CharField(default="",max_length=255, verbose_name='父文件夹路径')
+
+    class Meta:
+        db_table = 'File_Anno_Issue_Summary'
+        verbose_name = "文件注释问题总数"
+        verbose_name_plural = verbose_name
 
 
 

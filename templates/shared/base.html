@@ -17,14 +17,14 @@
     <script src="{%  static 'js/run_prettify.js' %}"></script>
     <script src="{%  static 'js/base.js' %}"></script>
     <script src="{%  static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
-    <script src="{%  static 'vendor/qtip/jquery.qtip.js' %}"></script> {% block custom_css %} {% endblock %}
+    <script src="{%  static 'vendor/qtip/jquery.qtip.js' %}"></script> 
+    {% block custom_css %} {% endblock %}
+    {% block custom_js %}  {% endblock %}
 </head>
 
 <body>
     {% include 'shared/navbar.html' %} 
     {% block content %} {% endblock %}
-
     {% include 'shared/footer.html' %} 
-    {% block custom_js %} {% endblock %}
 </body>
 </html>

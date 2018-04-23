@@ -40,9 +40,6 @@ def getFiles(path):
     files = os.listdir(path)
     flag = False
     while len(files) == 1 and os.path.isdir(path + os.path.sep + files[0]):
-        # print('-'*100)
-        # print(path + os.path.sep + files[0])
-        # print('-'*100)
         path = path + os.path.sep + files[0]
         files = os.listdir(path)
         flag = True

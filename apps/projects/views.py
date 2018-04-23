@@ -9,12 +9,11 @@ from datetime import datetime
 from .task import import_project
 from .models import Project, File
 from .forms import NewProjectForm
-from operations.models import Article, Annotation, Issue, Answer
+from operations.models import Article, Annotation, Issue, QuestionAnswer
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 from utils import get_project_tree
 
 logger = logging.getLogger('django')
-
 sourcepath = settings.SOURCEPATH
 
 
@@ -117,6 +116,8 @@ class ProjectSourceView(View):
             return render(request, 'projects/directory.html', locals())
         
         else:
+            print(11111111)
+            print(request.user)
             # 按linenum取出注释数目 返回结果是 <QuerySet [{'linenum': 0, 'nums': 1}, {'linenum': 1, 'nums': 2}, {'linenum': 2, 'nums': 2}]>
             # 因此需要进行一个转化
             # 这是django中分组的一种写法
@@ -124,7 +125,6 @@ class ProjectSourceView(View):
             annos_count = {}
             for i in annos:
                 annos_count[str(i['linenum'])] = i['nums']
-            print(annos_count)
             # 两种问题，一种是问答题一种是选择题
             # 对于选择题而言，是从三种问题中随机选择一个的
             # 对于问答题而言，目前应该是全部选择
@@ -134,7 +134,6 @@ class ProjectSourceView(View):
             question_count = {}
             for key in issues:
                 question_count[key]=len(issues[key])//2
-            # print(question_count)
 
             project_tree = get_project_tree.getHtml(settings.SOURCEPATH+project.path)
 
@@ -153,7 +152,6 @@ def choose_issue_type_1(file):
             issues[currentline].append(issue.issue_type)
         else:
             issues[currentline] = [issue.id, issue.issue_type]
-    print(issues)
     return issues
 
 
@@ -183,9 +181,7 @@ class FileListlView(View):
         })
 
 
-from suds.client import Client
-import json
-from django.http import JsonResponse, HttpResponse
+
 
 #获取工程树形结构
 # def tree_method(request, project_id):

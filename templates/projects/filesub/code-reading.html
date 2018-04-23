@@ -1,0 +1,45 @@
+ {% formatText2Line project.path file.path as lines %} {% for linenum,line in lines.items %}
+<div id="L{{ linenum }}" class="codeline" onmouseover="show_currentLine({{linenum}})" onmouseout="hide_currentLine({{linenum}})">
+    <div id="linenum_{{ linenum  }}" class="linenum">{{ linenum }}</div>
+    <!-- onmouseover="style.backgroundColor='#f1efec'" onmouseout="style.backgroundColor='white'"> -->
+    <div id="code_{{ linenum }}" class="sourcecode">
+        <pre class="prettyprint">{{ line|safe }}</pre>
+    </div>
+
+    <div id="linestatus_{{ linenum }}" class="linestatus">
+        <span class="codeopration" id="codeopration_anno_{{linenum}}">
+            {% if linenum in annos_count %}
+            <span id="annonums_{{ linenum }}" class="annonums" onclick="show_annotation({{ file.id }},{{ linenum }})">
+                {{ annos_count|keyValue:linenum }}
+            </span>
+            {% endif %}
+        </span>
+        <span class="codeopration" id="codeopration_question_{{linenum}}">
+            {% if linenum in question_count %}
+            <span id="questionums_{{ linenum }}" class="questionnums" onclick='show_question({{ file.id }},{{ linenum }}, "{{ issues | keyValue:linenum }}" )'>
+                {{ question_count | keyValue:linenum }}
+            </span>
+            {% endif %}
+        </span>
+
+        <span id="addanno_{{ linenum }}" class="addanno" onclick="show_add_annotation(this)" style="visibility: hidden;">
+            <img src="/static/image/add.png" class="addanno-img" height="16" width="20" />
+        </span>
+
+        <div class="addno-panel" id="addno-panel">
+            <div class="trangle-op"></div>
+            <div class="put-content">
+                <select id="addno-select-{{ linenum }}" class="put-option">
+                    <option>注释</option>
+                    <option>问题</option>
+                </select>
+                <textarea id="addno-text-{{ linenum }}" class="put-text" placeholder="输入注释或者问题"> </textarea>
+                <a href="#" onclick="add_annotation({{ file.id }},{{ linenum }})" class="submit fr" id="submit">提交</a>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endfor %}

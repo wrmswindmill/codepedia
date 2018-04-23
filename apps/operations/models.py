@@ -84,7 +84,7 @@ class Question(models.Model):
         return '问题{0}'.format(self.id)
 
 
-class Answer(models.Model):
+class QuestionAnswer(models.Model):
     user = models.ForeignKey(User, verbose_name='用户', on_delete=models.CASCADE)
     content = models.TextField(default='', verbose_name='内容')
     question = models.ForeignKey(Question, verbose_name='问题', related_name='question_ans', on_delete=models.CASCADE)
@@ -94,7 +94,7 @@ class Answer(models.Model):
     update_time = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'Answer'
+        db_table = 'Question_Answer'
         verbose_name = "回答"
         verbose_name_plural = verbose_name
 
@@ -233,16 +233,17 @@ class AnnotationComment(models.Model):
         return '评论{0}'.format(self.id)
 
 
-class AnswerComment(models.Model):
+class QuestionAnswerComment(models.Model):
     content = models.TextField(default='', verbose_name='内容')
     user = models.ForeignKey(User, verbose_name='用户',on_delete=models.CASCADE)
-    answer = models.ForeignKey(Answer, verbose_name='回答', related_name='answer_comment',on_delete=models.CASCADE)
+    answer = models.ForeignKey(QuestionAnswer, verbose_name='回答',
+                               related_name='answer_comment', on_delete=models.CASCADE)
     vote = models.IntegerField(default=0, verbose_name='点赞数量')
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'Answer_Comment'
+        db_table = 'Question_Answer_Comment'
         verbose_name = u"回答评论"
         verbose_name_plural = verbose_name
 

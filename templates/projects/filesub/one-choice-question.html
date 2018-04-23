@@ -1,0 +1,59 @@
+ {% for issue in issues%} {% if issue.issue_type == '1' %}
+<div class="questions showinfo clearfix">
+<div class="plusnum fl">
+    <!-- 点赞 -->
+    <a href="javascript:void(0)" class="fa sort up" onclick='add_vote("question",136996,1)'></a>
+    <!-- 点赞数量 -->
+    <span class="question-count">
+        {{ issue.vote }}
+    </span>
+    <!--  点踩  -->
+    <a href="javascript:void(0)" class="fa sort down" onclick='add_vote("question",136996,-1)'></a>
+</div>
+
+<!-- 问题的选项区域 ' -->
+<div class="allinfo fr">
+    <p class="info-p info-content">单选题:{{ issue.content }}</p>
+    <div class="option-panel">
+        <span>
+            {% for issueChoice in issueChoices %} {% if issueChoice.issue.pk == issue.pk %}
+            <input type="radio" name="question_{{issue.pk}}" value="{{issueChoice.choice_position}}" /> {{ issueChoice.choice_text }} {% endif %} {% endfor %}
+        </span>
+    </div>
+
+    <!-- 默认应该是隐藏的，除非它输入了答案 -->
+    <p class="commitanswer clearfix">
+        {% for issueAnswer in issueAnswers %} 
+        {% if issueAnswer.issue.pk == issue.pk %}
+        <span class="showanswer">你的答案：{{issueAnswer.content}}</span>
+        <span class="showanswer">参考答案：</span>
+        {% endif %} 
+        {% endfor %}
+
+        <a href="javascript:void(0)" class="btn fl" onclick='submit_answer({{issue.pk}})' })>提交答案</a>
+    </p>
+    <!-- 如果有注释的话，循环获取评论 -->
+    {% for comment in comments %} {% if comment.issue.pk == issue.pk %}
+    <div class="comment-item">
+        <p class="comment-con">
+            {{ comment.content }}
+        </p>
+        <p class="comment-name">
+            <a href="javascript:void(0)">
+                {{ comment.user.nick_name }}
+            </a>
+        </p>
+    </div>
+    {% endif %} {% endfor %}
+    <!-- 添加评论区域 -->
+    <div class="comment-btn clearfix">
+        <a href="javascript:void(0)" class="btn fr" onclick="addcomments(this)" id="addcom">添加评论</a>
+        <div class="comment-write clearfix none">
+            <textarea class="writetext" id="writetext_{{ issue.pk }}" placehoder="请输入评论内容"></textarea>
+            <a href="javascript:void(0)" class="btn fr" onclick="cancelcom(this)">取消</a>
+            <a href="javascript:void(0)" class="btn fr" style="margin-right:10px;" onclick='add_comment_action(this,{{ issue.pk }},"issue")'>添加评论</a>
+        </div>
+    </div>
+</div>
+</div>
+{% endif %} {% endfor %}
