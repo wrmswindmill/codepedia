@@ -1,4 +1,7 @@
- {% formatText2Line project.path file.path as lines %} {% for linenum,line in lines.items %}
+{% load base_filter %}
+
+{% formatText2Line project.path file.path as lines %} 
+{% for linenum,line in lines.items %}
 <div id="L{{ linenum }}" class="codeline" onmouseover="show_currentLine({{linenum}})" onmouseout="hide_currentLine({{linenum}})">
     <div id="linenum_{{ linenum  }}" class="linenum">{{ linenum }}</div>
     <!-- onmouseover="style.backgroundColor='#f1efec'" onmouseout="style.backgroundColor='white'"> -->
@@ -27,15 +30,15 @@
         </span>
 
         <div class="addno-panel" id="addno-panel">
+
             <div class="trangle-op"></div>
             <div class="put-content">
-                <select id="addno-select-{{ linenum }}" class="put-option">
-                    <option>注释</option>
-                    <option>问题</option>
-                </select>
+                <p class="put-select clearfix" id="addno-select-{{linenum}}">
+                    <span class="active">注释</span>
+                    <span>问题</span>
+                </p>
                 <textarea id="addno-text-{{ linenum }}" class="put-text" placeholder="输入注释或者问题"> </textarea>
                 <a href="#" onclick="add_annotation({{ file.id }},{{ linenum }})" class="submit fr" id="submit">提交</a>
-                </form>
             </div>
         </div>
 

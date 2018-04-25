@@ -6,6 +6,7 @@ from django.conf import settings
 import json
 import requests
 from django.core import serializers
+from django.db.models import Count
 # Create your views here.
 
 
@@ -43,7 +44,7 @@ class ShowAnnotationView(View):
         anno_comments = sorted(anno_comments, key=lambda anno_comment: anno_comment.annotation_id)
 
         html_str = render_to_string('projects/filesub/annotation.html', {'linenum':line_num,'annos': annotations,"anno_comments":anno_comments})
-        # print(html_str)
+        print(html_str)
         return HttpResponse(json.dumps({"status": "success","html_str":html_str}), content_type='application/json')
 
 class ShowIssueView(View):
@@ -527,40 +528,126 @@ class AcceptAnswerView(View):
 #TODO
 #目前Hotest问题是针对所有回答了的问题而言的
 #如果回答数量不够，那么按照更新时间排序
+#目前不针对所有的文件，就针对当前的文件
+import operator
 class GetHotestIssuesView(View):
     def post(self, request):
-        num = request.POST.get("question_num");
+        num = int(request.POST.get("question_num"))
         path = request.POST.get("path")
         project_id = request.POST.get("project_id")
-        file_type = request.POST.get("file_type")
-        #获取对应的问题
-        # 如果是文件级别的，直接获取当前文件的即可
-        if file_type=='file':
-            file = File.objects.get(path="%s"%(path))
-            file_id =file.pk
-            issues = Issue.objects.filter(file_id=file_id)
-        # 如果是根目录级别的，也可以直接获取所有文件的
-        elif file_type=='rootdir':
-            issue = Issue.object.filter(project_id=project_id)
-        # 否则就是普通目录级别了
+        file = File.objects.get(project_id=project_id,path=path)
+        # 获取当前文件所有的问题
+        issues_origin = Issue.objects.filter(file=file)
+        # 获取当前文件所有的问题的回答数目
+        issue_answernum={}
+        issueAnswers = IssueAnswer.objects.filter(issue__in=issues_origin)
+        for issueAnswer in issueAnswers:
+            if issueAnswer.issue_id in issue_answernum:
+                issue_answernum[issueAnswer.issue_id]+=1
+            else:
+                issue_answernum[issueAnswer.issue_id] = 1
+        # 按照回答数将问题排序
+        issues_num=[]
+        for issue in issues_origin:
+            if issue.pk in issue_answernum:
+                issues_num.append((issue,issue_answernum[issue.pk]))
+        sorted_issues=[]
+        if len(issues_num)>0:
+            tmp_issues = sorted(issues_num, key=lambda tuple1: tuple1[1])
+            for i in range(len(tmp_issues)):
+                sorted_issues.append(tmp_issues[i][0])
+        #如果当前已经回答的问题比问题数目要多
+        if len(sorted_issues)>=num:
+            issues = sorted_issues[0:num]
+        #如果当前回答的问题比总问题数目要少
         else:
-            # 根据path获取当前path下所有的文件的FileId
-            file_ids = set()
-            for file in File.objects.filter(path__startswith="%s"%(path)):
-                file_ids.add(file.pk)
-            # 获取当前项目的所有问题
-            issues = Issue.objects.filter(file_id__in=file_ids)
-        
-        # #获取当前项目所有回答过问题的题目
-        # #可能会有问题
-        # issue_answers = IssueAnswer.objects.filter(project_id=project_id).values('issue_id').annotate(nums=Count('issue_id')).order_by('nums')
-        # for issue in issue_answers:
-        #     if issue.issue_id in 
-
-        # 排序
-        if len(issues)>num:
-            issues = issues[0:num]
-        html_str = render_to_string('projects/filesub/hotProject.html', {'issues':issues})
-        print(html_str)
+            issues = sorted_issues
+            count = len(sorted_issues)
+            for i in range(len(issues_origin)):
+                if count>=num:
+                    break;
+                if issues_origin[i].pk not in issue_answernum:
+                    issues.append(issues_origin[i])
+                    count += 1
+        # print(issues)
+        html_str = render_to_string('projects/filesub/hotest_issue.html', {'issues': issues})
+        # print(html_str)
         return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
 
+# Backup
+# class GetHotestIssuesView(View):
+#     def post(self, request):
+#         num = request.POST.get("question_num");
+#         file_id = request.POST.get("file_id")
+#         # 根据file_id获取project_id以及path，并判断文件类型
+#         project_id = request.POST.get("project_id")
+#         file_type = request.POST.get("file_type")
+
+#         #获取对应的问题
+#         #如果是文件级别的，直接获取当前文件的即可
+#         if file_type=='file':
+#             file = File.objects.get(path="%s"%(path))
+#             file_id =file.pk
+#             issues = Issue.objects.filter(file_id=file_id)
+#         # 如果是根目录级别的，也可以直接获取所有文件的
+#         elif file_type=='rootdir':
+#             issue = Issue.object.filter(project_id=project_id)
+#         # 否则就是普通目录级别了
+#         else:
+#             # 根据path获取当前path下所有的文件的FileId
+#             file_ids = set()
+#             for file in File.objects.filter(path__startswith="%s"%(path)):
+#                 file_ids.add(file.pk)
+#             # 获取当前项目的所有问题
+#             issues = Issue.objects.filter(file_id__in=file_ids)
+        
+#         # #获取当前项目所有回答过问题的题目
+#         # #可能会有问题
+#         # issue_answers = IssueAnswer.objects.filter(project_id=project_id).values('issue_id').annotate(nums=Count('issue_id')).order_by('nums')
+#         # for issue in issue_answers:
+#         #     if issue.issue_id in 
+
+#         # 排序
+#         if len(issues)>num:
+#             issues = issues[0:num]
+#         html_str = render_to_string('projects/filesub/hotest_issue.html', {'issues':issues})
+#         print(html_str)
+#         return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
+
+
+def choose_issue_type_1(file):
+    all_issues_origin = Issue.objects.filter(file=file, issue_type=1)
+
+    issues = {}
+    # 行号，对应的的问题id，以及问题的类型
+    for issue in all_issues_origin:
+        currentline = str(issue.linenum)
+        if currentline in issues:
+            issues[currentline].append(issue.id)
+            issues[currentline].append(issue.issue_type)
+        else:
+            issues[currentline] = [issue.id, issue.issue_type]
+    return issues
+
+
+class Get_CodeReading_Content_View(View):
+    def post(self,request):
+        project_id = request.POST.get("project_id")
+        path = request.POST.get("path")
+
+        project = Project.objects.filter(id=project_id).first()
+        file = File.objects.filter(path=path, project_id=project_id).first()
+
+        annos = Annotation.objects.filter(file=file).values('linenum').annotate(nums=Count('linenum'))
+        annos_count = {}
+        for i in annos:
+            annos_count[str(i['linenum'])] = i['nums']
+        
+        issues=choose_issue_type_1(file)
+        question_count = {}
+        for key in issues:
+            question_count[key]=len(issues[key])//2
+
+        html_str = render_to_string('projects/filesub/code-reading.html',locals())
+        # print(html_str)
+        return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')

@@ -71,74 +71,82 @@ class ProjectInfoView(View):
 # FIXME
 # 每一行问题的数量有待修复
 # 目前做的是总数/3,但是对于问答题而言，应该是全部都要算上的
+# class ProjectSourceView_Before(View):
+#     def get(self, request, name, path):
+#         project = Project.objects.filter(name=name).first()
+#         # 判断是否是根目录
+
+#         #parent_dir保存了上一级目录
+#         if path=='/':
+#             file = File.objects.filter(path='', project=project).first()
+#             parent_dir = None
+#         else:
+#             file = File.objects.filter(path=path, project=project).first()
+#             parent_dir = path[:path.rindex("/")]
+        
+#         #默认会进入当前文件夹的第一个文件，如果当前文件夹没有任何的文件，那么进入指定的文件
+#         enter_project_url = "/src/net/micode/notes/gtask/data/TaskList.java"
+       
+#         # 判断当前文件是否是文件夹
+#         # 获取目录
+#         path = file.path.split('/')        
+#         path_dict = {}
+#         for i in range(1, len(path)):
+#             path_dict[path[i]] = '/'.join(path[:i + 1])
+            
+#         #file.type=1 means it's a dir
+#         #file.type=0 means it's a file
+#         if file.type == '1':
+            
+#             #enter_flag如果当前文件夹下有文件，
+#             #那么将它设置为False，并将enter_project_url改为第一个文件的path
+#             enter_flag = True
+#             files = File.objects.filter(super_path=file, project=project)
+            
+#             annos_count = {}
+#             for file in files:
+#                 if enter_flag and file.type=='0':
+#                     enter_project_url = file.path;
+#                     enter_flag = False
+#                 # 取出每个文件的注释数量
+#                 anno_count = Annotation.objects.filter(file=file).count()
+#                 # print("%s:%i"%(file.name,anno_count))
+#                 if anno_count > 0:
+#                     annos_count[file.name] = str(anno_count)
+#             return render(request, 'projects/directory.html', locals())
+        
+#         else:
+#             print(11111111)
+#             print(request.user)
+#             # 按linenum取出注释数目 返回结果是 <QuerySet [{'linenum': 0, 'nums': 1}, {'linenum': 1, 'nums': 2}, {'linenum': 2, 'nums': 2}]>
+#             # 因此需要进行一个转化
+#             # 这是django中分组的一种写法
+#             annos = Annotation.objects.filter(file=file).values('linenum').annotate(nums=Count('linenum'))
+#             annos_count = {}
+#             for i in annos:
+#                 annos_count[str(i['linenum'])] = i['nums']
+#             # 两种问题，一种是问答题一种是选择题
+#             # 对于选择题而言，是从三种问题中随机选择一个的
+#             # 对于问答题而言，目前应该是全部选择
+#             #  issue_type=1对应选择题，issue_type=2对应这问答题
+#             issues=choose_issue_type_1(file)
+            
+#             question_count = {}
+#             for key in issues:
+#                 question_count[key]=len(issues[key])//2
+
+#             project_tree = get_project_tree.getHtml(settings.SOURCEPATH+project.path)
+
+#             return render(request, 'projects/source.html', locals())           
+
+
 class ProjectSourceView(View):
     def get(self, request, name, path):
         project = Project.objects.filter(name=name).first()
-        # 判断是否是根目录
-
-        #parent_dir保存了上一级目录
-        if path=='/':
-            file = File.objects.filter(path='', project=project).first()
-            parent_dir = None
-        else:
-            file = File.objects.filter(path=path, project=project).first()
-            parent_dir = path[:path.rindex("/")]
-        
-        #默认会进入当前文件夹的第一个文件，如果当前文件夹没有任何的文件，那么进入指定的文件
-        enter_project_url = "/src/net/micode/notes/gtask/data/TaskList.java"
-       
-        # 判断当前文件是否是文件夹
-        # 获取目录
-        path = file.path.split('/')        
-        path_dict = {}
-        for i in range(1, len(path)):
-            path_dict[path[i]] = '/'.join(path[:i + 1])
-            
-        #file.type=1 means it's a dir
-        #file.type=0 means it's a file
-        if file.type == '1':
-            
-            #enter_flag如果当前文件夹下有文件，
-            #那么将它设置为False，并将enter_project_url改为第一个文件的path
-            enter_flag = True
-            files = File.objects.filter(super_path=file, project=project)
-            
-            annos_count = {}
-            for file in files:
-                if enter_flag and file.type=='0':
-                    enter_project_url = file.path;
-                    enter_flag = False
-                # 取出每个文件的注释数量
-                anno_count = Annotation.objects.filter(file=file).count()
-                # print("%s:%i"%(file.name,anno_count))
-                if anno_count > 0:
-                    annos_count[file.name] = str(anno_count)
-            return render(request, 'projects/directory.html', locals())
-        
-        else:
-            print(11111111)
-            print(request.user)
-            # 按linenum取出注释数目 返回结果是 <QuerySet [{'linenum': 0, 'nums': 1}, {'linenum': 1, 'nums': 2}, {'linenum': 2, 'nums': 2}]>
-            # 因此需要进行一个转化
-            # 这是django中分组的一种写法
-            annos = Annotation.objects.filter(file=file).values('linenum').annotate(nums=Count('linenum'))
-            annos_count = {}
-            for i in annos:
-                annos_count[str(i['linenum'])] = i['nums']
-            # 两种问题，一种是问答题一种是选择题
-            # 对于选择题而言，是从三种问题中随机选择一个的
-            # 对于问答题而言，目前应该是全部选择
-            #  issue_type=1对应选择题，issue_type=2对应这问答题
-            issues=choose_issue_type_1(file)
-            
-            question_count = {}
-            for key in issues:
-                question_count[key]=len(issues[key])//2
-
-            project_tree = get_project_tree.getHtml(settings.SOURCEPATH+project.path)
-
-            return render(request, 'projects/source.html', locals())           
-
+        # 判断是否是根目录      
+        print(request.user)
+        project_tree = get_project_tree.getHtml(settings.SOURCEPATH+project.path)
+        return render(request, 'projects/source.html', locals())
 
 def choose_issue_type_1(file):
     all_issues_origin = Issue.objects.filter(file=file, issue_type=1)
@@ -156,7 +164,7 @@ def choose_issue_type_1(file):
 
 
 
-            #文件列表页
+#文件列表页
 class FileListlView(View):
     def get(self, request):
         all_files = File.objects.all()

@@ -1,0 +1,52 @@
+<div class="close-right" onclick="colserightpanel();">×</div>
+<p class="right-name">第{{linenum}}行注释</p>
+<!-- 左侧点赞区域 -->
+{% for anno in annos%}
+<div class="questions showinfo clearfix">
+    <div class="plusnum fl">
+        <a href="javascript:void(0)" class="fa sort up">
+
+        </a>
+        <!--点赞数量 -->
+        <span class="question-count">
+            {{ anno.vote }}
+        </span>
+        <!--点踩  -->
+        <a href="javascript:void(0)" class="fa sort down"></a>
+    </div>
+    <!-- 中间问题内容区域 -->
+    <div class="allinfo fr">
+        <p class="info-p info-content">
+            {{ anno.content }}
+        </p>
+        <p class="info-p" style="font-size:12px;text-align:right">
+            <a href="javascript:void(0)">
+                {{ anno.user.nick_name }}
+            </a>
+            <span>
+                {{ anno.update_time }}
+            </span>
+        </p>
+
+        <!-- 问题对应的评论区域  -->
+        {% for comment in anno_comments %} {% if comment.annotation.pk == anno.pk %}
+        <div class="comment-item">
+            <p class="comment-con">{{ comment.content }} </p>
+            <p class="comment-name">
+                <a href="javascript:void(0)"> {{ comment.user.nick_name }} </a>
+            </p>
+        </div>
+        {% endif %} {% endfor %}
+        <!-- 评论框 -->
+        <div class="comment-btn clearfix">
+            <a href="javascript:void(0)" class="btn fr" onclick="addcomments(this)" id="addcom">添加评论</a>
+            <div class="comment-write clearfix none">
+                <textarea class="writetext" id="writetext_{{ anno.pk }}" placehoder="请输入评论内容"></textarea>
+                <a href="javascript:void(0)" class="btn fr" onclick="cancelcom(this)">取消</a>
+                <a href="javascript:void(0)" class="btn fr" style="margin-right:10px;" onclick='add_comment_action(this,{{ anno.pk }},"annotation")'>添加评论</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>

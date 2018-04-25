@@ -1,0 +1,7 @@
+<h3>Hot question</h3>
+{% for issue in issues%}
+<li class="hot-qus clearfix">
+    <a href="javascript:void(0)" onclick='show_issue("{{issue.pk}}")'>{{issue.content}}</a>
+    <span>1</span>
+</li>
+{% endfor %}

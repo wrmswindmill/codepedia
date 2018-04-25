@@ -1,25 +1,39 @@
-<!DOCTYPE html> {% load base_filter %} {% load static %} {% load crispy_forms_tags %}
+<!DOCTYPE html> 
+{% load base_filter %} 
+{% load static %} 
+{% load crispy_forms_tags %}
 <html>
 
 <head>
     <meta charset="UTF-8">
-    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
-    <script type="application/javascript" src="{%  static 'js/prettify.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{%  static 'css/prettify.css' %}">
-    <link rel="stylesheet" type="text/css" href="{%  static 'css/code_show.css' %}">
+    <script type="application/javascript" src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <script type="application/javascript" src="{% static 'js/prettify.js' %}"></script>
+    <script type="application/javascript" src="{% static 'js/source.js' %}"></script>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/prettify.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/bootstrap/css/bootstrap1.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/qtip/jquery.qtip.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/code_show.css' %}">
+
     <title>{{ project.name }}-{{ project.desc }}</title>
-    <script src="{% static 'js/source.js' %}"></script>
+
 
 </head>
 
 
 <body id="codepanel">
     <!-- 要求与codepeida的保持一致 -->
-    <ul class="nav navbar-nav navbar-right"></ul>
+    <div class="clearfix head">
+        <img src="/static/image/codepedia.png" style="margin:16px 0px 0px 30px">
+        <!-- 要求与codepeida的保持一致 -->
+        <ul class="nav navbar-nav navbar-right">
+            {% include 'projects/filesub/login.html' %}
+        </ul>
+    </div>
+
 
     <div id="search_response"></div>
-
-    <p class="font-18 filename"></p>
 
     <div class="clearfix modify-all">
         <div class="left">
@@ -35,7 +49,7 @@
                     </font>
                 </p>
                 <div id="filelist-content">
-
+                     {{ project_tree | safe }}
                 </div>
             </div>
             <div class="fl left-rightlist" style="display:none;">
@@ -46,7 +60,7 @@
                     </font>
                 </p>
                 <div id="structure-context">
-
+                    
                 </div>
             </div>
         </div>
@@ -54,16 +68,24 @@
         <div id="right_code" class="clearfix">
 
             <div class="loadCommentpanel-back" id="loadCommentpanel">
-
+                
             </div>
 
             <div class="loadQuestionpanel-back" id="loadQuestionpanel">
-
+                
             </div>
+
+            <p class="font-16 filename"></p>
 
 
             <div class="fl middle-area">
-
+                <div class="tab_head clearfix">
+                    <!-- 这个对应这tab标签栏 -->
+                </div>
+                
+                <div class="code_Area clearfix">
+                    <!-- 这个对应这相对应的代码内容 -->
+                </div>
             </div>
 
             <div class="fl middle-right">
@@ -97,28 +119,8 @@
                     </div>
                 </div>
 
-                <div class="middle-right-item">
-                    <h3>Hot question</h3>
-                    <li class="hot-qus clearfix">
-                        <a href="javascript:void(0)">为什么要这么写呢？我不明白，能解释一下吗？</a>
-                        <span>1</span>
-                    </li>
-                    <li class="hot-qus clearfix">
-                        <a href="javascript:void(0)">为什么要这么写呢？我不明白，能解释一下吗？</a>
-                        <span>1</span>
-                    </li>
-                    <li class="hot-qus clearfix">
-                        <a href="javascript:void(0)">为什么要这么写呢？我不明白，能解释一下吗？</a>
-                        <span>1</span>
-                    </li>
-                    <li class="hot-qus clearfix">
-                        <a href="javascript:void(0)">为什么要这么写呢？我不明白，能解释一下吗？</a>
-                        <span>1</span>
-                    </li>
-                    <li class="hot-qus clearfix">
-                        <a href="javascript:void(0)">为什么要这么写呢？我不明白，能解释一下吗？</a>
-                        <span>10</span>
-                    </li>
+                <div class="middle-right-item" id="hotest_issue">
+                    
                 </div>
             </div>
         </div>

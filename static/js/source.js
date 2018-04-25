@@ -31,16 +31,8 @@ function show_annotation(file_id, line_num) {
         },
         success: function (data) {
             if (data.status === "success") {
-                $(".show-info-panel").html(data.html_str);
-
-                var left = ($(".left").width());
-                if (flag) {
-                    $(".codereading").css("width", "60%");
-                } else {
-                    var wid = $(".codereading").width();
-                    $(".codereading").css("width", wid - (left * 2) + "px");
-                }
-                $(".right").removeClass("none");
+                $("#loadCommentpanel").html(data.html_str);
+                $("#loadCommentpanel").show(); 
             }
 
         }
@@ -139,9 +131,14 @@ function show_new_comment(item, content, username) {
         return;
     }
     var html = "";
+
     html += "<div class=\"comment-item\">";
-    html += "<p class=\"comment-con\">" + content + "</p>";
-    html += "<p class=\"comment-name\">----<a href=\"javascript:void(0)\">" + username + "</a></p></div>";
+    html += "<p>" + username+"</p>";
+    html += "<span class=\"color-grey-des\">" + content+"</span></div>"
+    // html += "<p class=\"comment-con\">" + content + "</p>";
+    // html += "<p class=\"comment-name\">----<a href=\"javascript:void(0)\">" + username + "</a></p></div>";
+
+    
     $(item).parents(".comment-btn").before(html);
     $(item).parents(".comment-btn").find(".comment-write").addClass("none");
     $(item).parents(".comment-btn").find("#addcom").removeClass("none");
@@ -157,7 +154,9 @@ function add_annotation(file_id, line_num) {
     //$("#annotation").html("------您将在此处为第" + line_num + "行代码添加注释或者问题-------")
     // 获取当前是注释还是问题
     var select_context = "#addno-select-" + line_num + " option:selected";
+    
     var selectValue = $(select_context).text();  //获取选中的项
+    console.log(selectValue)
 
     var text_context = "#addno-text-" + line_num;
     var content = $(text_context).val();
@@ -279,7 +278,12 @@ function search_symbol(args, ev) {
 
 
 
-function show_navigation(project_path, file_path) {
+function show_navigation() {
+    // 首先要获取当前打开的标签页，或者也可以获取当前的路径
+    // 获取当前的项目名称
+    var file_path=document.getElementsByClassName("filename")[0].innerHTML;
+    var project_path="Notes"
+    console.log(file_path)
 
     $.ajax({
         cache: false,
@@ -314,10 +318,10 @@ function show_navigation(project_path, file_path) {
                     content += str;
                 }
                 // document.getElementById("annotation").style.display="block";
-                $("#annotation").html(content)
+                $("#structure-context").html(content)
             }
             else {
-                $("#annotation").html(data.msg)
+                $("#structure-context").html(data.msg)
             }
         }
     });
@@ -486,4 +490,174 @@ function mouseCoords(ev) {
         x: ev.clientX + document.body.scrollLeft - document.body.clientLeft,
         y: ev.clientY + document.body.scrollTop - document.body.clientTop
     };
+}
+
+var tabSet = new Set();
+var issue_map = new Map();
+
+function path_predeal(path){
+    // path = path.replace('.', '');
+    // path = path.replace('/', '_');
+    path = path.split('.').join('');
+    path = path.split('/').join('_');
+    return path;
+}
+
+// 打开一个已经存在的标签页
+// 注意这个还得将对应的路径更改了
+function open_tab(path) {
+    path_input=path
+    path = path_predeal(path)
+
+    var tabcontent = document.getElementsByClassName("codereading");
+    for (var i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    var tab_items = document.getElementsByClassName("tab_items");
+    console.log(tab_items.length)
+    for (var i = 0; i < tab_items.length; i++) {
+        // debugger;
+        tab_items[i].className = tab_items[i].className.replace(" active", "");
+    }
+
+    document.getElementById("code_" + path).style.display = "block";
+    document.getElementById("tab_" + path).style.display = "block";
+    document.getElementById("tab_" + path).className += " active";
+
+    document.getElementsByClassName("filename")[0].innerHTML = path_input
+    $("#hotest_issue").html(issue_map[path])
+}
+// 添加一个新的标签页，
+// 如果标签页不存在，则创建一个新的标签页，然后调用open_tab
+// 如果标签页已经存在，则打开对应的标签页
+// 并调用open_tab
+function add_tab(project_id,path,filename) {
+    //需要将path处理一下，因为css样式中/以及.是不行的
+    var path_input = path;
+    console.log(path_input)
+    path = path_predeal(path)
+
+    if (tabSet.has(path)) {
+        open_tab(path)
+    } else {
+        var tab_tag = document.getElementsByClassName("tab_head")[0];
+        //添加tab
+        /*<li class="tab_item" id="tab_src_net_micode_notes_widget_NoteWidgetProvider">
+            <a href="javascript:void(0)" onclick="open_tab('src_net_micode_notes_widget_NoteWidgetProvider')">NoteWidgetProvider.java</a>
+            <a href="javascript:void(0)" onclick="close_tab('src_net_micode_notes_widget_NoteWidgetProvider')">&times</a>
+        </li> */
+        var li_tab_item = document.createElement("li")
+        li_tab_item.className = "tab_items";
+        li_tab_item.id = "tab_" + path;
+
+        var tag_a1 = document.createElement("a");
+        tag_a1.href ="javascript:void(0)";
+        tag_a1.textContent = filename
+        tag_a1.onclick = (function () {
+            return function () {
+                open_tab(path_input);
+            }
+        })();
+        
+        var tag_a2 = document.createElement("a")
+        tag_a2.href = "javascript:void(0)";
+        tag_a2.textContent = '×'  
+        tag_a2.onclick = (function () {
+            return function () {
+                close_tab(path_input);
+            }
+        })();
+
+
+        li_tab_item.appendChild(tag_a1)
+        li_tab_item.appendChild(tag_a2)
+        tab_tag.appendChild(li_tab_item)
+
+        // 添加对应的code-reading的Element
+        var div_code = document.getElementsByClassName("code_Area")[0]
+        var div_codereading = document.createElement("div")
+
+        div_codereading.id = "code_" + path;
+        div_codereading.className = "codereading";
+        div_code.appendChild(div_codereading)
+
+        tabSet.add(path);
+        console.log(path)
+        open_tab(path_input);
+
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: '/operations/get_codereading_content/',
+            data: { 'project_id': project_id, 'path': path_input },
+            dataType: 'json',
+            async: true,
+            beforeSend: function (xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+
+            success: function (data) {
+                if (data.status === 'success') {
+                    // 获取code-reading的内容，并填充到对应的code-reading的Element
+                    var content = data.html_str
+                    div_codereading.innerHTML = content;
+                }
+                else {
+                    div_codereading.innerHTML = "";
+                }
+            }
+        });
+        
+        // 填充hotest_question
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: '/operations/get_hotest_issues/',
+            data: { 'project_id': project_id, 'path': path_input,"question_num":5 },
+            dataType: 'json',
+            async: true,
+            beforeSend: function (xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data) {
+                console.log(111111111);
+                if (data.status === 'success') {
+                    console.log(data.html_str);
+                    issue_map[path] = data.html_str;
+                    // document.getElementById("hotest_issue").innerHTML=data.html_str;
+                }
+                else {
+                    issue_map[path] = ""
+                }
+            }
+        });
+    }
+}
+// 这里也可以更改为item，传入this
+function close_tab(path) {
+    // 将当前的当前Element的父节点isplay:none
+    // 将对应的code-reading区域设置为display:none
+    path = path_predeal(path)
+
+    var element = document.getElementById("tab_" + path);
+    var previosuElement = element.previousElementSibling;
+    var nextElement = element.nextElementSibling;
+
+    document.getElementById("code_" + path).remove()
+    element.remove()
+    tabSet.delete(path)
+
+    // 如果该标签页有上一个标签，将此标签的上一个标签页打开
+    if (previosuElement != undefined) {
+        var path = previosuElement.id.substr(4);
+        open_tab(path)
+        return;
+    }
+    // 如果该标签页有下一个兄弟标签，将此标签的下一个标签页打开
+    if (nextElement != undefined) {
+        var path = nextElement.id.substr(4);
+        open_tab(path);
+        return;
+    }
 }
