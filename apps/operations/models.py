@@ -155,7 +155,7 @@ class IssueStandardAnswers(models.Model):
 
     class Meta:
         db_table = "Issue_Standard_Answers"
-        verbose_name = "Issue参考答案"
+        verbose_name = u"Issue参考答案"
         verbose_name_plural = verbose_name
 
 
@@ -170,7 +170,7 @@ class IssueAnswer(models.Model):
 
     class Meta:
         db_table = 'Issue_Answer'
-        verbose_name = "回答"
+        verbose_name = u"回答"
         verbose_name_plural = verbose_name
 
     def __str__(self):

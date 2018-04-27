@@ -1,15 +1,11 @@
-<!DOCTYPE html> 
-{% load base_filter %} 
-{% load static %} 
-{% load crispy_forms_tags %}
+<!DOCTYPE html> {% load base_filter %} {% load static %} {% load crispy_forms_tags %}
 <html>
 
 <head>
     <meta charset="UTF-8">
-    <script type="application/javascript" src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <script type="application/javascript" src="{% static 'js/jquery-1.8.3-ui-1.9.2-ujs-2.0.3.js' %}"></script>
     <script type="application/javascript" src="{% static 'js/prettify.js' %}"></script>
     <script type="application/javascript" src="{% static 'js/source.js' %}"></script>
-
     <link rel="stylesheet" type="text/css" href="{% static 'css/prettify.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'vendor/bootstrap/css/bootstrap1.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
@@ -17,8 +13,6 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/code_show.css' %}">
 
     <title>{{ project.name }}-{{ project.desc }}</title>
-
-
 </head>
 
 
@@ -28,7 +22,11 @@
         <img src="/static/image/codepedia.png" style="margin:16px 0px 0px 30px">
         <!-- 要求与codepeida的保持一致 -->
         <ul class="nav navbar-nav navbar-right">
-            {% include 'projects/filesub/login.html' %}
+            {% if request.user.is_authenticated %} 
+            {% include 'projects/filesub/login.html' %} 
+            {% else %} 
+            {% include 'projects/filesub/unlogin.html'%} 
+            {% endif %}
         </ul>
     </div>
 
@@ -38,8 +36,12 @@
     <div class="clearfix modify-all">
         <div class="left">
             <ul class="fl left-tab">
-                <li class="active">Files</li>
-                <li onclick="show_navigation(this)">Structure</li>
+                <li class="active">
+                    <span>Files</span>
+                </li>
+                <li onclick="show_navigation(this)">
+                    <span>Structure</span>
+                </li>
             </ul>
             <div class="fl left-rightlist" id="file-list">
                 <p class="tab-title clearfix">
@@ -49,7 +51,7 @@
                     </font>
                 </p>
                 <div id="filelist-content">
-                     {{ project_tree | safe }}
+                    {{ project_tree | safe }}
                 </div>
             </div>
             <div class="fl left-rightlist" style="display:none;">
@@ -60,7 +62,7 @@
                     </font>
                 </p>
                 <div id="structure-context">
-                    
+
                 </div>
             </div>
         </div>
@@ -68,59 +70,73 @@
         <div id="right_code" class="clearfix">
 
             <div class="loadCommentpanel-back" id="loadCommentpanel">
-                
+
             </div>
 
             <div class="loadQuestionpanel-back" id="loadQuestionpanel">
-                
+
             </div>
 
             <p class="font-16 filename"></p>
 
+            <div class="clearfix" style="display: flex;padding-top: 42px;">
+                <div class="fl middle-area">
+                    <div class="tab_head clearfix">
+                        <!-- 这个对应这tab标签栏 -->
+                        <!-- tab这一块是通过js添加的，放在js -->
+                        <li class="fr tab_head_more">
+                            +
+                            <ul class="tab_nav_ul">
+                                <!-- <li>
+                                <a href="javascript:void(0)"></a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)"></a>
+                            </li> -->
+                            </ul>
+                        </li>
+                    </div>
 
-            <div class="fl middle-area">
-                <div class="tab_head clearfix">
-                    <!-- 这个对应这tab标签栏 -->
-                </div>
-                
-                <div class="code_Area clearfix">
-                    <!-- 这个对应这相对应的代码内容 -->
-                </div>
-            </div>
+                    <div class="code_Area clearfix">
+                        <!-- 这个对应这相对应的代码内容 -->
 
-            <div class="fl middle-right">
-                <div class="middle-right-item">
-                    <p class="clearfix">
-                        <span class="panel-left">Created</span>
-                        <span class="panel-right">2018年4月22日 11:19</span>
-                    </p>
-                    <p class="clearfix">
-                        <span class="panel-left">Views</span>
-                        <span class="panel-right">392</span>
-                    </p>
-                    <p class="clearfix">
-                        <span class="panel-left">Active</span>
-                        <span class="panel-right">2018年4月22日 11:19</span>
-                    </p>
-                    <p class="clearfix">
-                        <span class="panel-left">Source</span>
-                        <span class="panel-right color-blue">GitHub/MiNote
-                            <br/>OSSEAN/Minote</span>
-                    </p>
-                </div>
-
-                <div class="middle-right-item">
-                    <p>Project Description</p>
-                    <p class="color-grey-des">This method was deprecated in API level 23 as of JDK version 1.1</p>
-                    <div class="des clearfix">
-                        <span>style</span>
-                        <span>script</span>
-                        <span>script</span>
                     </div>
                 </div>
 
-                <div class="middle-right-item" id="hotest_issue">
-                    
+                <div class="fl middle-right">
+                    <div class="middle-right-item">
+                        <p class="clearfix">
+                            <span class="panel-left">Created</span>
+                            <span class="panel-right">2018年4月22日 11:19</span>
+                        </p>
+                        <p class="clearfix">
+                            <span class="panel-left">Views</span>
+                            <span class="panel-right">392</span>
+                        </p>
+                        <p class="clearfix">
+                            <span class="panel-left">Active</span>
+                            <span class="panel-right">2018年4月22日 11:19</span>
+                        </p>
+                        <p class="clearfix">
+                            <span class="panel-left">Source</span>
+                            <span class="panel-right color-blue">GitHub/MiNote
+                                <br/>OSSEAN/Minote</span>
+                        </p>
+                    </div>
+
+                    <div class="middle-right-item">
+                        <p>Project Description</p>
+                        <p class="color-grey-des">This method was deprecated in API level 23 as of JDK version 1.1</p>
+                        <div class="des clearfix">
+                            <span>style</span>
+                            <span>script</span>
+                            <span>script</span>
+                        </div>
+                    </div>
+
+                    <div class="middle-right-item" id="hotest_issue">
+
+                    </div>
                 </div>
             </div>
         </div>

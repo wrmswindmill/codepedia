@@ -15,10 +15,10 @@ Including another URLconf
 """
 
 from django.urls import path
-from .views import ShowQuestionView, ShowAnnotationView, ShowNavigationView
-from .views import AddAnnotationView, AddArticleView, AddQuestionView, AddAnswerView, AddCommentView
+from .views import ShowIssueQuestionView, ShowAnnotationView, ShowNavigationView
+from .views import AddAnnotationView, AddArticleView, AddQuestionView, AddIssueAnswerView, AddCommentView
 from .views import UpdateAnnotationView, UpdateArticleView, UpdateQuestionView, UpdateAnswerView, UpdateCommentView
-from .views import AddVoteView, AcceptAnswerView, ShowMethodInfo, GetHotestIssuesView,Get_CodeReading_Content_View
+from .views import AddVoteView, AcceptAnswerView, ShowMethodInfo, GetHotestIssuesView, Get_CodeReading_Content_View, AddQuestionAnswerView
 
 app_name = "operations"
 urlpatterns = [
@@ -28,18 +28,17 @@ urlpatterns = [
     path('update_article/', UpdateArticleView.as_view(), name='update_article'),
     path('add_question/', AddQuestionView.as_view(), name='new_question'),
     path('update_question/',  UpdateQuestionView.as_view(), name='update_question'),
-    path('add_answer/', AddAnswerView.as_view(), name='new_answer'),
+    path('add_issue_answer/', AddIssueAnswerView.as_view(), name='add_issue_answer'),
     path('update_answer/',  UpdateAnswerView.as_view(), name='update_answer'),
     path('add_comment/', AddCommentView.as_view(), name='new_comment'),
     path('update_comment/',  UpdateCommentView.as_view(), name='update_comment'),
     path('show_annotation/', ShowAnnotationView.as_view(), name='show_annotation'),
     path('show_navigation/', ShowNavigationView.as_view(), name='show_navigation'),
-    path('show_question/', ShowQuestionView.as_view(), name='show_question'),
-    path('show_issue/', ShowQuestionView.as_view(), name='show_issue'),
+    path('show_issue_question/', ShowIssueQuestionView.as_view(),name='show_issue_question'),
     path('accept_answer/', AcceptAnswerView.as_view(), name='accept_answer'),
     path('add_vote/', AddVoteView.as_view(), name='add_vote'),
     path('show_method_info/', ShowMethodInfo.as_view(), name='show_method_info'),
-    path('get_hotest_issues/', GetHotestIssuesView.as_view(),
-         name='get_hotest_issues'),
-    path('get_codereading_content/', Get_CodeReading_Content_View.as_view(),name='get_codereading_content')
+    path('get_hotest_issues/', GetHotestIssuesView.as_view(),name='get_hotest_issues'),
+    path('get_codereading_content/', Get_CodeReading_Content_View.as_view(),name='get_codereading_content'),
+    path('add_question_answer/',AddQuestionAnswerView.as_view(), name='add_question_answer/')
 ]

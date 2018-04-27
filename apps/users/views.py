@@ -11,10 +11,11 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import requests
 
-
+from projects.models import File
 from .models import User, EmailVerifyRecord
 from .forms import LoginForm,RegisterForm
 import utils.scanner_project as scanner
+from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 
 
 # Create your views here.
@@ -165,8 +166,27 @@ class UserInfoView(View):
 
 class IndexView(View):
     def get(self,request):
-        # scanner.get_anno_issue_summary("/opt/opengrok/source/Notes",1)
-        return render(request, 'index.html', {})
+        all_files = File.objects.all()
+        hot_blobs = File.objects.order_by('-views')[:5]
+
+        sort = request.GET.get('sort', '')
+        if sort == '' or sort == "hot":
+            all_files = all_files.order_by('-anno_num')
+        else:
+            all_files = all_files.order_by('-create_time')
+        #分页功能
+        try:
+            page = request.GET.get('page', 1)
+        except PageNotAnInteger:
+            page = 1
+        p = Paginator(all_files, 10,  request=request)
+        files = p.page(page)
+
+        return render(request, 'projects/file-list.html', {
+            'all_files': files,
+            'hot_objs': hot_blobs,
+        })
+        # return render(request, 'index.html', {})
 
 
 class LogoutView(View):

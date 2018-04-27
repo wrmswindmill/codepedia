@@ -1,0 +1,67 @@
+<div class="path_info">
+    <div class="clearfix mb10">
+        <span class="fl font-20">目录信息</span>
+        <p class="fr">
+            <span class="fl mr15 mt7">
+                <img src="/static/image/annotation.png" class="mr3">
+                <span class="font-12">{{anno_num}}</span>
+            </span>
+            <span class="fl mt7">
+                <img src="/static/image/question.png" class="mr3">
+                <span class="font-12">{{issue_num}}</span>
+            </span>
+        </p>
+    </div>
+    <div class="filePathInfo">
+        <div class="clearfix filePathline">
+            <span>
+                <label>标注文件数</label>
+                <label>{{anno_filenum}}</label>
+            </span>
+            <span>
+                <label>系统提问数</label>
+                <label>{{issue_sum}}</label>
+            </span>
+            <span>
+                <label>参与用户数</label>
+                <label>{{usersum}}</label>
+            </span>
+        </div>
+        <div class="clearfix filePathline">
+            <span>
+                <label>用户注释数</label>
+                <label>{{anno_sum}}</label>
+            </span>
+            <span>
+                <label>用户提问数</label>
+                <label>{{question_sum}}</label>
+            </span>
+            <span>
+                <label>最新标注文件数</label>
+                <label>0</label>
+            </span>
+        </div>
+    </div>
+    <div class="clearfix mb10 mt10">
+        <span class="fl font-20">文件信息</span>
+        <p class="fr">
+            <span class="fl mt7 info-nav active">注释</span>
+            <em class="ver-line"></em>
+            <span class="fl mt7 info-nav">问题</span>
+        </p>
+    </div>
+    <div class="filePathInfo">
+        <div class="clearfix filePathline fileinfo-item">
+            <span>名称</span>
+            <span>注释</span>
+            <span>问题</span>
+        </div>
+        {% for fileid, name_anno_issue in fileid_name_anno_issue.items %}  
+        <div class="clearfix filePathline fileinfo-item">
+            {% for item in name_anno_issue %}
+            <span>{{ item }}</span>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div>

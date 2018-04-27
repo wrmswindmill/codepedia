@@ -16,8 +16,9 @@ from .models import Vote
 from users.models import User
 from .forms import NewArticleForm
 from projects.models import File
-from projects.models import Language,Project
+from projects.models import Language, Project, FileAnnoIssueSummary
 from django.template.loader import render_to_string
+import base64
 
 
 class ShowAnnotationView(View):
@@ -25,8 +26,8 @@ class ShowAnnotationView(View):
     获取某一行代码所有的注释
     """
     def post(self, request):
-        # if not request.user.is_authenticated:
-            # return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
+        if not request.user.is_authenticated:
+            return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
         file_id = int(request.POST.get('file_id', ''))
         line_num = int(request.POST.get('line_num', ''))
         # file_id = 118
@@ -47,70 +48,60 @@ class ShowAnnotationView(View):
         print(html_str)
         return HttpResponse(json.dumps({"status": "success","html_str":html_str}), content_type='application/json')
 
-class ShowIssueView(View):
+# FIXME
+# user_id
+class ShowIssueQuestionView(View):
     """
        获取某一行代码所有的提问
     """
     def post(self, request):
-        # file_id = int(request.POST.get('file_id', ''))
+        if not request.user.is_authenticated:
+            return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
+
+        file_id = int(request.POST.get('file_id', ''))
         line_num = request.POST.get('line_num', '')
-        print(line_num)
+        issue_ids_str = request.POST.get('issue_ids', '')
+        issue_ids_str = issue_ids_str[1:len(issue_ids_str)-1]
+        # print(issue_ids_str)
+        if len(issue_ids_str)==0:
+            issue_ids = None
+        else:
+            issue_ids = [int(x) for x in issue_ids_str.split(',')]
+        # 假设我们生成的策略都是一致的,那么只需要传入一个line_num即可
+        # 如果是个性化推荐的话,还需要传入issue_id
+        # 需要issue,对应的IssueAnswer,IssueStandardAnswer,IssueChoice
+        # 同时还需要Quesion相关的内容,Question,Question
+        if issue_ids is None:
+            issues, issueChoices, issueAnswers, issueStandardAnswers, issue_comments = None,None,None,None,None
+            issuenum = 0
+        else:
+            issues = Issue.objects.filter(id__in=issue_ids)
+            issueChoices = IssueChoices.objects.filter(issue__in=issues)
+            issueAnswers = IssueAnswer.objects.filter(issue__in=issues, user_id=request.user.id)
+            issueStandardAnswers = IssueStandardAnswers.objects.filter(issue__in=issues)
+            issue_comments = IssueComment.objects.filter(issue__in=issues)
+            issuenum = len(issues)
 
-        issue_id_type = request.POST.get('issue_id_type', '')
-        issue_id_type = issue_id_type[1:len(issue_id_type)-1]
+        questions = Question.objects.filter(linenum=line_num, file_id=file_id)
+        if questions is None or len(questions)==0:
+            questionAnswers, question_comments=None,None
+            questionnum=0
+        else:
+            questionAnswers = QuestionAnswer.objects.filter(question__in=questions,user_id=request.user.id)
+            question_comments = QuestionAnswerComment.objects.filter(answer__in=questionAnswers)
+            print(questionAnswers)
+            questionnum = len(questions)
 
-        list1 = issue_id_type.split(",")
-
-        issue_ids = []
-        for i in range(0, len(list1), 2):
-            issue_ids.append(list1[i])
-
-        issues = Issue.objects.filter(id__in=issue_ids)
-        issueChoices = IssueChoices.objects.filter(issue__in=issues)
-        issueAnswers = IssueAnswer.objects.filter(issue__in=issues, user_id=1)
-        # print(issueAnswer)
-        issueStandardAnswer = IssueStandardAnswers.objects.filter(
-            issue__in=issues)
-
-        comments = IssueComment.objects.filter(issue__in=issues)
-        print(issueStandardAnswer)
-        print(comments)
-        # issues = serializers.serialize("json", issues)
-        # issueChoices = serializers.serialize("json",issueChoices)
-
-        html_str = render_to_string('projects/filesub/question.html', {'linenum': line_num, 'issues': issues, 'issueChoices': issueChoices,
-                                                                       'issueAnswers': issueAnswers, 'issueStandardAnswer': issueStandardAnswer, 'comments': comments})
-        print(html_str)
-        return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
-
-        # question_ids = []
-        # for question in questions:
-        #     question_ids.append(question.id)
-        # question_comments = QuestionComment.objects.filter(
-        #     question_id__in=question_ids)
-        # question_comments = sorted(
-        #     question_comments, key=lambda question_comment: question_comments.question_id)
-
-        return HttpResponse(json.dumps({"status": "success", "issues": issues, "issueChoices": issueChoices}), content_type='application/json')
-
-
-class ShowQuestionView(View):
-    def post(self, request):
-        line_num = request.POST.get('line_num', '')
-        file_id = request.POST.get('file_id', '')
-
-        questions = Question.objects.filters(file_id=file_id,line_num=line_num)
-        answers =QuestionAnswer.objects.filters(question__in=questions)
-        comments = QuestionAnswerComment.objects.filters(answer__in=answers)
-        # issues = serializers.serialize("json", issues)
-        # issueChoices = serializers.serialize("json",issueChoices)
-
-        # html_str = render_to_string('projects/filesub/question.html', {'linenum': line_num, 'issues': issues, 'issueChoices': issueChoices,
-                                                                        # 'issueAnswers': issueAnswers, 'issueStandardAnswer': issueStandardAnswer, 'comments': comments})
+        html_str = render_to_string('projects/filesub/issue_question.html', {'linenum': line_num, 'issues': issues, 'issueChoices': issueChoices,'issue_comments': issue_comments,'questions':questions,"questionAnswers":questionAnswers,"question_comments":question_comments,"issuenum":issuenum,"questionnum":questionnum})
         # print(html_str)
-        # return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
+        
+        if issueAnswers is not None and len(issueAnswers)>0:
+            issueAnswers = serializers.serialize("json",issueAnswers)
+            issueStandardAnswers = serializers.serialize("json", issueStandardAnswers)
+            return HttpResponse(json.dumps({"status": "success", "html_str": html_str, 'issueAnswers': issueAnswers, 'issueStandardAnswers': issueStandardAnswers, }), content_type='application/json')
+        else:
+            return HttpResponse(json.dumps({"status": "success", "html_str": html_str}))
 
-    
 class ShowNavigationView(View):
     """
        获取当前文件的Structure，也就是Package,Class，Method信息。
@@ -119,11 +110,14 @@ class ShowNavigationView(View):
         navigation_url = settings.OPENGROK_NAVIGATION_URL
         project_path = request.POST.get('project_path', '')
         file_path = request.POST.get('file_path', '')
-        print(file_path)
+        # print(file_path)
         navigation_url = navigation_url +project_path + file_path
         response = requests.get(navigation_url).text
-        
+        project_id = Project.objects.get(name=project_path)
+        file_id = File.objects.get(project_id=project_id,path=file_path).pk
+
         #deal response
+        # file_id = 
         response = response.replace("]],[","]]|[")
         if response:
             all_symbols = []
@@ -132,7 +126,7 @@ class ShowNavigationView(View):
                 del symbol[1]
                 all_symbols.append(symbol)
             # print(all_symbols)
-            return HttpResponse(json.dumps({"status": "success", "msg": all_symbols}), content_type='application/json')
+            return HttpResponse(json.dumps({"status": "success", "msg": all_symbols,"file_id":file_id}), content_type='application/json')
         else:
             return HttpResponse(json.dumps({"status": "failed", "msg": 'null'}), content_type='application/json')
 
@@ -158,18 +152,28 @@ class ShowMethodInfo(View):
                     languageObj=Language.objects.filter(name=project.language).first()
                     if languageObj is not None:
                         query_str+= "&project="+languageObj.src
-        print(query_str)
+
         url = method_query_url+query_str
         query_result = requests.get(url).text
-        print(query_result)
+
         if query_result is not None:
             result_dict = json.loads(query_result)
-            results = result_dict['results']
-            print("--------------------------------------------------")
-            print(results)
-            if len(results)>0:
-                return HttpResponse(json.dumps({"status": "success", "msg": results, "url": settings.OPENGROK_NAVIGATION_URL}), content_type='application/json')
-        return HttpResponse(json.dumps({"status": "failed", "msg": []}), content_type='application/json')
+            tmp_results = result_dict['results']
+            print(tmp_results)
+            results = []
+            for i in range(len(tmp_results)):
+                path_origin = tmp_results[i]['path'][1:]
+                index = path_origin.find("/")
+                project_name = path_origin[0:index]
+                relative_path = path_origin[index:]
+                filename = tmp_results[i]['filename']
+                code = tmp_results[i]['line']
+                code = str(base64.b64decode(code), 'utf-8')
+                results.append([filename, relative_path,path_origin,code])
+
+            # print(results)
+            html_str = render_to_string('projects/filesub/search-response.html', {'results': results, 'project_id': project.pk, })
+        return HttpResponse(json.dumps({"status": "success", "html_str":html_str}), content_type='application/json')
 
 # FIXME
 # 还没有获取用户id，需要从request中获取用户id
@@ -226,8 +230,7 @@ class UpdateAnnotationView(View):
 class AddQuestionView(View):
     def post(self, request):
         if not request.user.is_authenticated:
-            return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
-        
+            return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')        
         content = request.POST.get('content', '')
         file_id = request.POST.get('file_id', '')
         linenum = request.POST.get('linenum', '')
@@ -262,27 +265,31 @@ class UpdateQuestionView(View):
             return HttpResponse('{"status":"fail","msg":"参数传递错误，更新失败"}', content_type='application/json')
 
 
-class AddAnswerView(View):
+class AddIssueAnswerView(View):
     def post(self, request):
+
         if not request.user.is_authenticated:
             return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
         content = request.POST.get('content', '')
         issue_id = request.POST.get('issue_id', '')
 
         if int(issue_id) > 0 and content:
-            exist_record = IssueAnswer.objects.filter(issue_id=issue_id,user_id=1)
+            exist_record = IssueAnswer.objects.filter(issue_id=issue_id,user_id=request.user.id)
             if exist_record:
-                 return HttpResponse('{"status":"fail","msg":"您已回到过问题了"}', content_type='application/json')
+                 return HttpResponse('{"status":"success","msg":"您已回到过问题了"}', content_type='application/json')
             try:
                 answer = IssueAnswer()
                 issue = Issue.objects.get(id=issue_id)
                 answer.issue_id = issue.pk
                 answer.content = content
                 answer.user = request.user
+                standAnswer = IssueStandardAnswers.objects.get(issue_id=issue_id).choice_position
+                if content==standAnswer:
+                    answer.correct=1
+                else:
+                    answer.correct=0
                 answer.save()
-                answer = serializers.serialize("json", [answer,])
-                return HttpResponse(json.dumps({"status": "success","msg":"回答成功", "answer": answer}),
-                                content_type='application/json')
+                return HttpResponse(json.dumps({"status": "success","msg":"回答成功", "standAnswer":standAnswer }),content_type='application/json')
             except Exception as e:
                 return HttpResponse('{"status":"fail","msg":"参数传递错误，回答失败"}', content_type='application/json')
         else:
@@ -335,6 +342,7 @@ class AddCommentView(View):
         type = request.POST.get('type', '')        
         object_id = int(request.POST.get('object_id', ''))
         print(content,type,object_id)
+
         if object_id > 0 and content:
             try:
                 if type == 'annotation':
@@ -362,6 +370,24 @@ class AddCommentView(View):
             comment.user = request.user
             comment.save()
             return HttpResponse(json.dumps({"status":"success","msg":"评论成功","username":comment.user.nick_name}), content_type='application/json')
+        else:
+            return HttpResponse('{"status":"fail","msg":"评论失败"}', content_type='application/json')
+
+
+class AddQuestionAnswerView(View):
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
+        question_id = int(request.POST.get("question_id"))
+        content = request.POST.get("content")
+        
+        if question_id > 0 and content:
+            answer = QuestionAnswer()
+            answer.content = content
+            answer.user = request.user
+            answer.question_id = question_id
+            answer.save()
+            return HttpResponse(json.dumps({"status": "success", "msg": "回答成功", "username": answer.user.nick_name}), content_type='application/json')
         else:
             return HttpResponse('{"status":"fail","msg":"评论失败"}', content_type='application/json')
 
@@ -615,39 +641,121 @@ class GetHotestIssuesView(View):
 #         return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
 
 
-def choose_issue_type_1(file):
-    all_issues_origin = Issue.objects.filter(file=file, issue_type=1)
-
-    issues = {}
-    # 行号，对应的的问题id，以及问题的类型
-    for issue in all_issues_origin:
-        currentline = str(issue.linenum)
-        if currentline in issues:
-            issues[currentline].append(issue.id)
-            issues[currentline].append(issue.issue_type)
-        else:
-            issues[currentline] = [issue.id, issue.issue_type]
-    return issues
-
-
 class Get_CodeReading_Content_View(View):
     def post(self,request):
         project_id = request.POST.get("project_id")
         path = request.POST.get("path")
-
-        project = Project.objects.filter(id=project_id).first()
-        file = File.objects.filter(path=path, project_id=project_id).first()
-
-        annos = Annotation.objects.filter(file=file).values('linenum').annotate(nums=Count('linenum'))
-        annos_count = {}
-        for i in annos:
-            annos_count[str(i['linenum'])] = i['nums']
-        
-        issues=choose_issue_type_1(file)
-        question_count = {}
-        for key in issues:
-            question_count[key]=len(issues[key])//2
-
-        html_str = render_to_string('projects/filesub/code-reading.html',locals())
-        # print(html_str)
+        print(path)
+        # 根据path确定它是不是文件
+        # (目前的判断方法是查看File_Anno_Issue_Summary表中是否有parentDir为传入的path,如果有说明是文件夹)
+        isDir = (len(FileAnnoIssueSummary.objects.filter(project_id=project_id,parent_path=path))>0)
+        if isDir:
+            html_str = get_dir_info(project_id,path)
+            # print(html_str)
+        else:
+            html_str = get_code(project_id,path)
         return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
+
+def get_code(project_id,path):
+    project = Project.objects.filter(id=project_id).first()
+    file = File.objects.filter(path=path, project_id=project_id).first()
+    fileid = file.pk
+
+    annos = Annotation.objects.filter(file=file).values('linenum').annotate(nums=Count('linenum'))
+    annos_count = {}
+    for i in annos:
+        annos_count[str(i['linenum'])] = i['nums']
+
+    issues = choose_issue(file)
+    issues_count = {}
+    for key in issues:
+        issues_count[key] = len(issues[key])
+    
+    questions = Question.objects.filter(file=file).values('linenum').annotate(nums=Count('linenum'))
+    questions_count = {}
+    for i in questions:
+        questions_count[str(i['linenum'])] = i['nums']
+    print(questions_count)
+
+    html_str = render_to_string('projects/filesub/code-reading.html', locals())
+    return html_str
+    # print(html_str)
+
+
+def choose_issue(file, issue_type=1, issue_info=1):
+    all_issues_origin = Issue.objects.filter(
+        file=file, issue_type=issue_type, issue_info=issue_type)
+    issues = {}
+    # 行号，对应的的问题id，以及问题的类型
+    # 可能会有多个问题,而该行对应的问题以这样的形式表示:
+    # [issue1.id, issue1.issue_type,issue1.issue_info,issue2.id, issue2.issue_type,issue2.issue_info,...]
+    for issue in all_issues_origin:
+        current_linenum = str(issue.linenum)
+        if current_linenum in issues:
+            issues[current_linenum].append(issue.id)
+            # issues[current_linenum].append(issue.issue_type)
+            # issues[current_linenum].append(issue.issue_info)
+        else:
+            issues[current_linenum] = [issue.id]
+            # issues[current_linenum] = [issue.id, issue.issue_type,issue.issue_info]
+    return issues
+
+def get_project_info(project_id):
+    # 总注释数目
+    # anno_sum = len(Annotation.objects.filter(project_id=project_id))
+    # issue_sum = len(Issue.objects.filter(project_id=project_id))
+    # question_sum = len(Question.objects.filter(project_id=project_id))
+    pass
+
+
+
+def get_dir_info(project_id,path):
+    # 获取当前文件的注释总数以及问题总数
+    # 不需要累计的,只需要当前的即可了
+    anno_issue_summarys = FileAnnoIssueSummary.objects.filter(project_id=project_id,parent_path=path)
+    
+    #当前文件夹下所有的file_ids以及fileid与filename的映射
+    file_ids = []
+    fileid_name_anno_issue = {}
+    for summary in anno_issue_summarys:
+        file_ids.append(summary.file_id)
+        fileid_name_anno_issue[summary.file_id] = [summary.file.name,0,0]
+
+    annos = Annotation.objects.filter(file_id__in=file_ids)
+    fileid_annonum = annos.values('file_id').annotate(anno_num=Count('file_id'))
+    fileid_issuenum = Issue.objects.filter(file_id__in=file_ids).values('file_id').annotate(issue_num=Count('file_id'))
+    fileid_questionnum = Question.objects.filter(file_id__in=file_ids).values('file_id').annotate(question_num=Count('file_id'))
+    usersum = len(annos.values('user_id').annotate(user_num=Count('user_id')))
+    print("usernum:"+str(usersum))
+
+    anno_sum,issue_sum,question_sum=0,0,0
+    anno_filenum=0
+
+    for i in range(len(fileid_annonum)):
+        anno_filenum +=1
+        file_id = fileid_annonum[i]['file_id']
+        anno_num = fileid_annonum[i]['anno_num']
+        anno_sum+= anno_num
+        fileid_name_anno_issue[file_id][1]=anno_num
+
+    for i in range(len(fileid_issuenum)):
+        file_id = fileid_issuenum[i]['file_id']
+        issue_num = fileid_issuenum[i]['issue_num']
+        issue_sum += issue_num
+        fileid_name_anno_issue[file_id][2]=issue_num
+
+    for i in range(len(fileid_questionnum)):
+        question_sum += fileid_questionnum[i]['question_num']
+
+    html_str = render_to_string('projects/filesub/dir_info.html', locals())
+    return html_str
+
+# 获取当前文件夹各文件的注释数目以及问题数目
+# 获取当前文件夹的各文件
+
+
+def getAnnotationByFileId():
+    pass
+
+def getQuestionByFileId():
+    pass

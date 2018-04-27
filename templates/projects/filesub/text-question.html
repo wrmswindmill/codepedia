@@ -1,0 +1,40 @@
+{% for question in questions %}
+<div class="ques-part">
+    <p class="ques-t">
+        <i class="fa fa-star color-dark-blue mr3"></i>{{ forloop.counter }}.{{question.content}}
+    </p>
+</div>
+
+{% for answer in questionAnswers %} 
+{% if answer.question.pk == question.pk %}
+<div class="comments clearfix">
+    <div class="fl">
+        <img src="/static/image/users/default.png" width="45px" height="45px" class="radius" />
+    </div>
+    <div class="fl comments-right" >
+        <div class="question-comment">
+            <p>
+                <span class="comments-name">{{answer.user.nick_name}}</span>
+                <span class="font-12 color-grey-c">10分钟前</span>
+            </p>
+            <div class="comments-content">{{answer.content}}</div>
+            <div class="otherComments">
+                <p>
+                    <span class="comments-name">小小</span>
+                </p>
+                <div class="comments-content">向你学习</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<div class="responsePanel">
+    <input type="text" class="responseInput" id="responseInput_{{question.pk}}" placeholder="说点什么" />
+    <p class="clearfix">
+        <a href="javascript:void(0)" class="btn btn-blue fr" onclick="add_question_answer(this,{{question.pk}})">提交</a>
+    </p>
+</div>
+
+{% endfor %}

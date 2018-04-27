@@ -1,0 +1,45 @@
+{% for issue in issues%} 
+{% if issue.issue_type == '1' %}
+<div class="ques-part">
+    <p class="ques-t">
+        <i class="fa fa-star color-orange mr3"></i>
+        {{ issue.content }}
+    </p>
+    <div class="ques-answer">
+        {% for issueChoice in issueChoices %} 
+        {% if issueChoice.issue.pk == issue.pk %}
+        <li>
+            <input type="radio" name="issue_{{issue.pk}}" value="{{issueChoice.choice_position}}" /> {{ issueChoice.choice_text }}
+        </li>
+        {% endif %} 
+        {% endfor %}
+    </div>
+    <p class="clearfix">
+        <a href="javascript:void(0)" class="btn btn-blue fr" id="submit_onechoice_{{issue.pk}}" onclick="submit_onechoice_issue({{issue.pk}})">提交</a>
+    </p>
+</div>
+
+<div class="comments clearfix">
+    {% for comment in comments %} {% if comment.issue.pk == issue.pk %}
+    <div class="fl">
+        <img src="/static/image/users/default.png" width="45px" height="45px" class="radius" />
+    </div>
+    <div class="fl comments-right">
+        <p>
+            <span class="comments-name">{{ comment.user.nick_name }}</span>
+            <span class="font-12 color-grey-c">10分钟前</span>
+        </p>
+        <div class="comments-content">{{ comment.content }}</div>
+    </div>
+    {% endif %} 
+    {% endfor %}
+</div>
+
+<div class="responsePanel">
+    <input type="text" id="responseInput_{{issue.pk}}" class="responseInput" placeholder="说点什么" />
+    <p class="clearfix">
+        <a href="javascript:void(0)" class="btn btn-blue fr">提交</a>
+    </p>
+</div>
+{% endif %}
+{% endfor %}

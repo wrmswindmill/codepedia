@@ -11,7 +11,7 @@ from .models import Project, File
 from .forms import NewProjectForm
 from operations.models import Article, Annotation, Issue, QuestionAnswer
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
-from utils import get_project_tree
+from utils import get_project_tree,scanner_project
 
 logger = logging.getLogger('django')
 sourcepath = settings.SOURCEPATH
@@ -142,27 +142,10 @@ class ProjectInfoView(View):
 
 class ProjectSourceView(View):
     def get(self, request, name, path):
-        project = Project.objects.filter(name=name).first()
-        # 判断是否是根目录      
+        project = Project.objects.filter(name=name).first()    
         print(request.user)
         project_tree = get_project_tree.getHtml(settings.SOURCEPATH+project.path)
         return render(request, 'projects/source.html', locals())
-
-def choose_issue_type_1(file):
-    all_issues_origin = Issue.objects.filter(file=file, issue_type=1)
-
-    issues = {}
-    # 行号，对应的的问题id，以及问题的类型
-    for issue in all_issues_origin:
-        currentline = str(issue.linenum)
-        if currentline in issues:
-            issues[currentline].append(issue.id) 
-            issues[currentline].append(issue.issue_type)
-        else:
-            issues[currentline] = [issue.id, issue.issue_type]
-    return issues
-
-
 
 #文件列表页
 class FileListlView(View):
@@ -189,14 +172,7 @@ class FileListlView(View):
         })
 
 
-
-
-#获取工程树形结构
-# def tree_method(request, project_id):
-#     project = Project.objects.get(id=project_id)
-#     client = Client('http://localhost:7777/pro?wsdl')
-#     response = client.service.getTree(project.path)
-#     response = json.loads(response)
-#     return JsonResponse(response)
-
+class ScannerProjectView(View):
+    def get(self,request):
+        scanner_project.get_anno_issue_summary("/opt/opengrok/source/Notes", 1)
 

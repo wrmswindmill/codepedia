@@ -1,7 +1,42 @@
 <ul class="nav navbar-nav navbar-right" style="margin-right: 0px!important;">
-    <li style="margin-right:20px">
+    <li style="margin-right:20px" class="pr downList-panel fr">
         <img width="38" height="38" style='margin-top: 10px;float:left' src="/static/image/users/default.png" />
-        <span style="margin-top:15px;color:#666;float:left;margin-left:10px">小明同学</span>
+        <span>{{request.user.nick_name}}</span>
+        <i class="fa fa-caret-down color-grey-c fl mt22 ml5"></i>
+        <ul class="downList">
+            <li><a href="{% url 'users:userinfo' %}">进入个人中心</a></li>
+            <li><a href="{% url 'users:logout' %}">退出</a></li>          
+        </ul>
+    </li>
+    <li class="pr downList-panel fr" style="margin-right:20px">
+        <span>个人记录</span>
+        <i class="fa fa-caret-down color-grey-c fl mt22 ml5"></i>
+        <ul class="downList">
+            <li>
+                <a href="">提交代码</a>
+            </li>
+            <li>
+                <a href="">我的问题</a>
+            </li>
+            <li>
+                <a href="">我的回答</a>
+            </li>
+            <li>
+                <a href="">我的注释</a>
+            </li>
+            <li>
+                <a href="">我的评论</a>
+            </li>
+            <li>
+                <a href="">我的点赞</a>
+            </li>
+            <li>
+                <a href="">我的点踩</a>
+            </li>
+            <li>
+                <a href="{% url 'users:logout' %}">退出</a>
+            </li>   
+        </ul>
     </li>
     <!-- <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">jackone

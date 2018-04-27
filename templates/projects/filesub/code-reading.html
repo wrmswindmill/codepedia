@@ -2,43 +2,46 @@
 
 {% formatText2Line project.path file.path as lines %} 
 {% for linenum,line in lines.items %}
-<div id="L{{ linenum }}" class="codeline" onmouseover="show_currentLine({{linenum}})" onmouseout="hide_currentLine({{linenum}})">
+<div id="{{fileid}}_L{{ linenum }}" class="codeline" onmouseover='show_currentLine("{{fileid}}_{{linenum}}")' onmouseout='hide_currentLine("{{fileid}}_{{linenum}}")'>
     <div id="linenum_{{ linenum  }}" class="linenum">{{ linenum }}</div>
     <!-- onmouseover="style.backgroundColor='#f1efec'" onmouseout="style.backgroundColor='white'"> -->
-    <div id="code_{{ linenum }}" class="sourcecode">
+    <div id="code_{{fileid}}_{{ linenum }}" class="sourcecode">
         <pre class="prettyprint">{{ line|safe }}</pre>
     </div>
 
     <div id="linestatus_{{ linenum }}" class="linestatus">
-        <span class="codeopration" id="codeopration_anno_{{linenum}}">
+        <span class="codeopration" id="codeopration_anno_{{fileid}}_{{linenum}}">
             {% if linenum in annos_count %}
             <span id="annonums_{{ linenum }}" class="annonums" onclick="show_annotation({{ file.id }},{{ linenum }})">
-                {{ annos_count|keyValue:linenum }}
+
             </span>
             {% endif %}
         </span>
-        <span class="codeopration" id="codeopration_question_{{linenum}}">
-            {% if linenum in question_count %}
-            <span id="questionums_{{ linenum }}" class="questionnums" onclick='show_question({{ file.id }},{{ linenum }}, "{{ issues | keyValue:linenum }}" )'>
-                {{ question_count | keyValue:linenum }}
+        <span class="codeopration" id="codeopration_question_{{fileid}}_{{linenum}}">
+            {% if linenum in issues_count  %}
+            <span id="questionums_{{ linenum }}" class="questionnums" onclick='show_issue_question({{ file.id }},{{ linenum }},"{{ issues | keyValue:linenum }}" )'>
+                {# {{ question_count | keyValue:linenum }} #}
+            </span>
+            {% elif linenum in questions_count %}
+            <span id="questionums_{{ linenum }}" class="questionnums" onclick='show_issue_question({{ file.id }},{{ linenum }},"[]" )'>
             </span>
             {% endif %}
         </span>
 
-        <span id="addanno_{{ linenum }}" class="addanno" onclick="show_add_annotation(this)" style="visibility: hidden;">
-            <img src="/static/image/add.png" class="addanno-img" height="16" width="20" />
+        <span id="addanno_{{fileid}}_{{ linenum }}" class="addanno" style="visibility: hidden;">
+            <i class="fa fa-plus-circle color-grey-c"></i>
         </span>
 
-        <div class="addno-panel" id="addno-panel">
-
+        <div class="addno-panel" >
             <div class="trangle-op"></div>
             <div class="put-content">
                 <p class="put-select clearfix" id="addno-select-{{linenum}}">
-                    <span class="active">注释</span>
-                    <span>问题</span>
+                    <span class="active" onclick='$(this).siblings("span").removeClass("active"); $(this).addClass("active");'>注释</span>
+                    <span onclick='$(this).siblings("span").removeClass("active"); $(this).addClass("active");'>问题</span>
                 </p>
-                <textarea id="addno-text-{{ linenum }}" class="put-text" placeholder="输入注释或者问题"> </textarea>
-                <a href="#" onclick="add_annotation({{ file.id }},{{ linenum }})" class="submit fr" id="submit">提交</a>
+                
+                <textarea id="addno-text-{{fileid}}-{{ linenum }}" class="put-text" placeholder="输入注释或者问题"> </textarea>
+                <a href="#" onclick="add_annotation(this,{{ file.id }},{{ linenum }})" class="submit fr" id="submit">提交</a>
             </div>
         </div>
 
