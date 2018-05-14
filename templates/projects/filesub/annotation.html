@@ -1,10 +1,14 @@
 <div class="pr">
     <div class="commentPanel" id="commentPanel">
+        <p class="ques-title">
+            该代码块共有{{annos|length}}个注释
+        </p>
         {% for anno in annos%}
         <div class="commentparthalf">
             <div class="parthalf_con clearfix">
-                <span class="break_word color-grey-des">{{ anno.content }}</span>
-                <a href="javascript:void(0)" class="fr thumbsThis" onclick="thumbsThis(this)">
+                <span class="break_word color-grey-des">{{ forloop.counter }}.{{ anno.content }}</span>
+                {{anno.user.nick_name}}
+                <a href="javascript:void(0)" class="fr thumbsThis" onclick="thumbsAnno(this,{{anno.pk}},1)">
                     <i class="fa fa-thumbs-up mr3 color-grey-c"></i>
                     <span>{{ anno.vote }}</span>
                 </a>

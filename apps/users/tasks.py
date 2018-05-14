@@ -34,7 +34,6 @@ def send_type_email(email,send_type='register'):
         email_title = 'CodePedia注册激活链接'
         url = '请点击下面的链接激活你的账号:'+settings.DOMAIN_URL+'/users/active/{0}'
         email_body = url.format(code)
-        print(email_body)
         send_mail(email_title, email_body, settings.EMAIL_HOST_USER, [email])
     elif send_type == 'forget':
         email_title = 'CodePedia密码重置链接'

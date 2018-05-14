@@ -18,6 +18,9 @@ function getCookie(name) {
 var csrftoken = getCookie('csrftoken');
 
 function show_annotation(file_id, line_num) {
+    ev = window.event
+    var mousePos = mouseCoords(ev)
+
     $.ajax({
         cache: false,
         type: "POST",
@@ -31,6 +34,8 @@ function show_annotation(file_id, line_num) {
         success: function (data) {
             if (data.status === "success") {
                 $("#loadCommentpanel").html(data.html_str);
+                $("#commentPanel").css("top", mousePos.y);
+                $("#commentPanel").css("left", mousePos.x+35);
                 $("#loadCommentpanel").show();
             }else{
                 alert(data.msg)
@@ -43,6 +48,8 @@ function show_annotation(file_id, line_num) {
 // FIXME
 function show_issue_question(file_id, line_num, issue_ids) {
     issueid_str=issue_ids.toString()
+    ev = window.event
+    var mousePos = mouseCoords(ev)
     //发送问题id，返回问题内容
     $.ajax({
         cache: false,
@@ -66,14 +73,12 @@ function show_issue_question(file_id, line_num, issue_ids) {
                     //
                     issueAnswers = JSON.parse(data.issueAnswers);
                     issueStandardAnswers = JSON.parse(data.issueStandardAnswers);
-                    console.log(issueAnswers)
-                    console.log(issueStandardAnswers)
+
                     let count = 0
                     for (let i = 0; i < issue_ids.length; i++) {
                         issue_id = issue_ids[i]
-                        console.log(issue_id)
+      
                         if (issue_id == issueAnswers[count].fields.issue) {
-                            console.log()
                             var radios = document.getElementsByName("issue_" + issue_id)
                             user_answer = issueAnswers[0].fields.content;
                             standard_answer = issueStandardAnswers[0].fields.choice_position;
@@ -88,6 +93,8 @@ function show_issue_question(file_id, line_num, issue_ids) {
                         }
                     }
                 }
+                $("#questionPanel").css("top", mousePos.y);
+                $("#questionPanel").css("left", mousePos.x - 400);
                 $("#loadQuestionpanel").show()
             }else{
                 alert(data.msg)
@@ -117,7 +124,6 @@ function submit_onechoice_issue(issue_id) {
             if (data.status === 'success') {
                 var radios = document.getElementsByName("issue_" + issue_id)
                 var choose = parseInt(content) - 1
-                console.log(content,data.standAnswer)
                 if (content == data.standAnswer){
                     radios[choose].parentNode.style.color = "green";               
                 }else{
@@ -139,7 +145,6 @@ function add_comment_action(item, id, type) {
         confirm("请输入评论内容");
         return;
     }
-    console.log(content);
     //发送一个ajax请求
     $.ajax({
         cache: false,
@@ -214,9 +219,9 @@ function show_new_question_answer(item, content, username) {
     html += '</div></div></div>'
 
     $(item).parents(".responsePanel").before(html);
-
     $(item).parent().siblings(".responseInput").val("");
 }
+
 
 function add_annotation(item,file_id, line_num) {
     // 获取当前是注释还是问题
@@ -328,14 +333,19 @@ function search_symbol(args) {
 }
 
 
+navigation_map = new Map()
 
 function show_navigation() {
     // 首先要获取当前打开的标签页，或者也可以获取当前的路径
     // 获取当前的项目名称
     var file_path=document.getElementsByClassName("filename")[0].innerHTML;
     var project_path="Notes"
-    console.log(file_path)
-
+    if( navigation_map.has(project_path+file_path)){
+        content = navigation_map.get(project_path + file_path);
+        $("#structure-context").html(content)
+        return;
+    }
+    
     $.ajax({
         cache: false,
         type: "POST",
@@ -351,7 +361,6 @@ function show_navigation() {
             if (data.status === 'success') {
                 var content = "";
                 var obj = data.msg;
-                console.log(obj);
                 var file_id = data.file_id
                 for (let i = 0; i < obj.length; i++) {
                     var type = obj[i][0];
@@ -374,12 +383,13 @@ function show_navigation() {
                     str += "</div>";
                     content += str;
                 }
-
                 // document.getElementById("annotation").style.display="block";
+                navigation_map.set(project_path + file_path, content)
                 $("#structure-context").html(content)
             }
             else {
-                $("#structure-context").html(data.msg)
+                navigation_map.set(project_path + file_path, "")
+                $("#structure-context").html("")
             }
         }
     });
@@ -437,7 +447,10 @@ $(function () {
         $("#search_response").hide();
     })
 
-    $(".addno-panel").click(function (event) {event.stopPropagation();})
+    $(".addno-panel").click(function (event) {
+        event.stopPropagation();
+    })
+
     $(".addanno").live("click",function (event) {
         $(".addno-panel").hide();
         $(this).siblings(".addno-panel").show();
@@ -448,6 +461,7 @@ $(function () {
 
     $("body").click(function () { 
         $(".addno-panel").hide(); 
+        $(".source-addno-panel").remove()
         $(".addanno").find("i").removeClass("color-dark-57").addClass("color-grey-c"); 
     })
 
@@ -479,7 +493,6 @@ $(function () {
     $("#questionPanel").click(function (event) {
         event.stopPropagation();
     })
-
 })
 function addcomments(item) {
     $(item).siblings(".comment-write").removeClass("none");
@@ -502,8 +515,8 @@ function colserightpanel() {
     }
     $(".right").addClass("none");
 }
+
 function mouseCoords(ev) {
-    console.log(ev);
     if (ev.pageX || ev.pageY) {
         return {
             x: ev.pageX,
@@ -539,7 +552,6 @@ function open_tab(path) {
     }
 
     var tab_items = document.getElementsByClassName("tab_item");
-    console.log(tab_items.length)
     for (var i = 0; i < tab_items.length; i++) {
         // debugger;
         tab_items[i].className = tab_items[i].className.replace(" active", "");
@@ -550,17 +562,22 @@ function open_tab(path) {
     document.getElementById("tab_" + path).className += " active";
 
     document.getElementsByClassName("filename")[0].innerHTML = path_input;
-
-    $("#hotest_issue").html(issue_map[path])
+    console.log(11111)
+    if(!issue_map.has(path)){
+        window.setTimeout(function () { $("#hotest_issue").html(issue_map[path]) }, 3000);
+    }else{
+        $("#hotest_issue").html(issue_map[path]);
+    }
+    show_navigation();
 }
 // 添加一个新的标签页，
 // 如果标签页不存在，则创建一个新的标签页，然后调用open_tab
 // 如果标签页已经存在，则打开对应的标签页
 // 并调用open_tab
 function add_tab(project_id,path,filename) {
+
     //需要将path处理一下，因为css样式中/以及.是不行的
     var path_input = path;
-    console.log(path_input)
     path = path_predeal(path)
 
     if (tabSet.has(path)) {
@@ -630,7 +647,7 @@ function add_tab(project_id,path,filename) {
                 }
             }
         });
-        
+        open_tab(path_input);
         // 填充hotest_question
         $.ajax({
             cache: false,
@@ -645,11 +662,9 @@ function add_tab(project_id,path,filename) {
             success: function (data) {
                 if (data.status === 'success') {
                     issue_map[path] = data.html_str;
-                    open_tab(path_input);
                 }
                 else {
                     issue_map[path] = ""
-                    open_tab(path_input);
                 }
             }
         });
@@ -683,4 +698,151 @@ function close_tab(path) {
         open_tab(path);
         return;
     }
+}
+
+// 对应目录级别的addnoPanel
+function show_next_addnoPanel(file_id){
+    $("#addno-panel-"+file_id).show();
+    event.stopPropagation();
+}
+
+//注入html代码
+function inject_addnoPanel_html(item,file_id,linenum) {
+    html_str =  '<div class="addno-panel source-addno-panel" style="display:block">'+
+                    '<div class="trangle-op"></div>'+
+                    '<div class="put-content">'+
+                        '<p class="put-select clearfix" id="addno-select-'+linenum+'">'+
+                        '<span class="active" onclick=\'$(this).siblings("span").removeClass("active");$(this).addClass("active");\'>注释</span>'+
+                            '<span onclick=\'$(this).siblings("span").removeClass("active"); $(this).addClass("active");\'>问题</span>'+
+                        '</p>'+
+                        '<textarea id="addno-text-'+file_id+'-'+linenum+'" class="put-text" placeholder="输入注释或者问题"> </textarea>'+
+                        '<a href="#" onclick="add_annotation(this,'+file_id+','+linenum+')" class="submit fr" id="submit">提交</a>'+
+                    '</div>'+
+                '</div>';
+    $(item).after(html_str)
+    ev = window.event
+    ev.stopPropagation();
+} 
+
+
+
+
+function add_dir_annotation(item, file_id, line_num){
+    // 获取当前是注释还是问题
+    var selectValue = $(item).siblings(".put-select").find(".active").html().trim();
+    var text_context = "#addno-text-" + file_id + "-" + line_num;
+    var content = $(text_context).val();
+
+    if (content.trim().length == 0) {
+        alert("内容不能为空")
+        return;
+    }
+    if (selectValue == "注释") {
+        // 向addAnnatation中发请求
+        submint_dir_annotation(file_id, line_num, content);
+    } else {
+        submint_dir_question(file_id, line_num, content);
+    }
+}
+
+
+function submint_dir_annotation(file_id, line_num, content) {
+
+    $.ajax({
+        cache: false,
+        type: "POST",
+        url: '/operations/add_annotation/',
+        data: { 'file_id': file_id, 'linenum': line_num, 'content': content },
+        dataType: 'json',
+        async: true,
+        beforeSend: function (xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        },
+        success: function (data) {
+            if (data.status == 'success') {
+                var value = $("#dir_anno_" + file_id).html()
+                if (value.trim().length == 0) {
+                    $("#dir_anno_" + +file_id).html(1);
+                }else{
+                    $("#dir_anno_" + +file_id).html(parseInt(value) + 1);
+                }
+            }
+            alert(data.msg);
+        }
+    });
+}
+
+
+function submint_dir_question(file_id, line_num, content) {
+    $.ajax({
+        cache: false,
+        type: "POST",
+        url: '/operations/add_question/',
+        data: { 'file_id': file_id, 'linenum': line_num, 'content': content },
+        dataType: 'json',
+        async: true,
+        beforeSend: function (xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        },
+        success: function (data) {
+            if (data.status == 'success') {
+                var value = $("#dir_question_" + file_id).html()
+                if (value.trim().length == 0) {
+                    $("#dir_question_" + +file_id).html(1);
+                } else {
+                    $("#dir_question_" + +file_id).html(parseInt(value) + 1);
+                }
+            }
+            alert(data.msg);
+        }
+    });
+}
+
+
+function thumbsAnno(item,anno_id,vote_value) {
+    // 获取当前的vote
+    vote_tag = $(item).children("span").first()
+    vote_before = parseInt(vote_tag.text())
+    $.ajax({
+        cache: false,
+        type: "POST",
+        url: '/operations/add_vote/',
+        data: { 'vote_type': "annotation", 'object_id': anno_id, 'vote_value': vote_value },
+        dataType: 'json',
+        async: true,
+        beforeSend: function (xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        },
+        success: function (data) {
+            if (data.status == 'success') {
+                value = data.value
+                vote_tag.text(value+vote_before)
+            }else{
+                alert(data.msg);
+            }
+        }
+    });
+
+
+    // 更改当前的vote,默认+1
+}
+
+window.onload = function () {
+    url = window.location.href;
+    $.ajax({
+        cache: false,
+        type: "POST",
+        url: '/operations/get_addtab_paras/',
+        data: { 'url': url },
+        dataType: 'json',
+        async: true,
+        beforeSend: function (xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        },
+        success: function (data) {
+            if (data.status === 'success') {
+                add_tab(data.project_id, data.path, data.filename)
+            }
+        }
+    });
 }

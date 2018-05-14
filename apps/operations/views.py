@@ -11,7 +11,7 @@ from django.db.models import Count
 
 
 from .models import Annotation, Question, QuestionAnswer, Article, Issue, IssueAnswer, IssueStandardAnswers, IssueChoices
-from .models import AnnotationComment, QuestionComment, QuestionAnswerComment, ArticleComment, IssueComment
+from .models import AnnotationComment, QuestionComment, QuestionAnswerComment, ArticleComment, IssueComment, AnnotationStrategy
 from .models import Vote
 from users.models import User
 from .forms import NewArticleForm
@@ -20,8 +20,24 @@ from projects.models import Language, Project, FileAnnoIssueSummary
 from django.template.loader import render_to_string
 import base64
 
+""" 
+    策略：例如只显示只显示自己的Annotation
+    分为多个策略吧
+"""
 
 class ShowAnnotationView(View):
+
+    # 策略1：获取所有用户的Annotation
+    def get_all_annotations(self,file_id,line_num):
+        annotations = Annotation.objects.filter(file_id=file_id, linenum=line_num)
+        return annotations
+
+
+    # 策略2：只获取用户自己的Annotation
+    def get_user_annotation(self,file_id,line_num,user_id):
+        annotations = Annotation.objects.filter(file_id=file_id, linenum=line_num,user_id=user_id)
+        return annotations
+
     """
     获取某一行代码所有的注释
     """
@@ -30,22 +46,19 @@ class ShowAnnotationView(View):
             return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
         file_id = int(request.POST.get('file_id', ''))
         line_num = int(request.POST.get('line_num', ''))
-        # file_id = 118
-        # line_num = 1
-        # annotations 
-        annotations = Annotation.objects.filter(file_id=file_id, linenum=line_num)
-        
-        # users = set()
-        anno_ids = []
-        for anno in annotations:
-            anno_ids.append(anno.id)
-            # users.add(anno.user)
 
-        anno_comments = AnnotationComment.objects.filter(annotation_id__in=anno_ids)
+        # 先读取策略,保存在数据库中吧,这个是临时适应比赛需求的
+        # 传入的是project_id,传回strage
+        strategy = AnnotationStrategy.objects.get(project_id=File.objects.get(id=file_id).project_id)
+        if strategy.choice == 0:
+            annotations = self.get_all_annotations(file_id,line_num)
+        elif strategy.choice == 1:
+            annotations = self.get_user_annotation(file_id, line_num, request.user.pk)
+
+        anno_comments = AnnotationComment.objects.filter(annotation__in=annotations)
         anno_comments = sorted(anno_comments, key=lambda anno_comment: anno_comment.annotation_id)
 
         html_str = render_to_string('projects/filesub/annotation.html', {'linenum':line_num,'annos': annotations,"anno_comments":anno_comments})
-        print(html_str)
         return HttpResponse(json.dumps({"status": "success","html_str":html_str}), content_type='application/json')
 
 # FIXME
@@ -62,7 +75,6 @@ class ShowIssueQuestionView(View):
         line_num = request.POST.get('line_num', '')
         issue_ids_str = request.POST.get('issue_ids', '')
         issue_ids_str = issue_ids_str[1:len(issue_ids_str)-1]
-        # print(issue_ids_str)
         if len(issue_ids_str)==0:
             issue_ids = None
         else:
@@ -89,11 +101,9 @@ class ShowIssueQuestionView(View):
         else:
             questionAnswers = QuestionAnswer.objects.filter(question__in=questions,user_id=request.user.id)
             question_comments = QuestionAnswerComment.objects.filter(answer__in=questionAnswers)
-            print(questionAnswers)
             questionnum = len(questions)
 
         html_str = render_to_string('projects/filesub/issue_question.html', {'linenum': line_num, 'issues': issues, 'issueChoices': issueChoices,'issue_comments': issue_comments,'questions':questions,"questionAnswers":questionAnswers,"question_comments":question_comments,"issuenum":issuenum,"questionnum":questionnum})
-        # print(html_str)
         
         if issueAnswers is not None and len(issueAnswers)>0:
             issueAnswers = serializers.serialize("json",issueAnswers)
@@ -110,22 +120,23 @@ class ShowNavigationView(View):
         navigation_url = settings.OPENGROK_NAVIGATION_URL
         project_path = request.POST.get('project_path', '')
         file_path = request.POST.get('file_path', '')
-        # print(file_path)
+
         navigation_url = navigation_url +project_path + file_path
         response = requests.get(navigation_url).text
         project_id = Project.objects.get(name=project_path)
         file_id = File.objects.get(project_id=project_id,path=file_path).pk
 
-        #deal response
-        # file_id = 
         response = response.replace("]],[","]]|[")
         if response:
             all_symbols = []
             for symbol in response.split("|"):
-                symbol = json.loads(symbol)
-                del symbol[1]
-                all_symbols.append(symbol)
-            # print(all_symbols)
+                try:
+                    symbol = json.loads(symbol)
+                    del symbol[1]
+                    all_symbols.append(symbol)
+
+                except:
+                    return HttpResponse(json.dumps({"status": "failed", "msg": 'null'}), content_type='application/json')
             return HttpResponse(json.dumps({"status": "success", "msg": all_symbols,"file_id":file_id}), content_type='application/json')
         else:
             return HttpResponse(json.dumps({"status": "failed", "msg": 'null'}), content_type='application/json')
@@ -159,7 +170,7 @@ class ShowMethodInfo(View):
         if query_result is not None:
             result_dict = json.loads(query_result)
             tmp_results = result_dict['results']
-            print(tmp_results)
+
             results = []
             for i in range(len(tmp_results)):
                 path_origin = tmp_results[i]['path'][1:]
@@ -171,7 +182,6 @@ class ShowMethodInfo(View):
                 code = str(base64.b64decode(code), 'utf-8')
                 results.append([filename, relative_path,path_origin,code])
 
-            # print(results)
             html_str = render_to_string('projects/filesub/search-response.html', {'results': results, 'project_id': project.pk, })
         return HttpResponse(json.dumps({"status": "success", "html_str":html_str}), content_type='application/json')
 
@@ -184,9 +194,7 @@ class AddAnnotationView(View):
     def post(self, request):
         if not request.user.is_authenticated:
             return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
-        print(request)
         content = request.POST.get('content', '')
-        print(content)
         file_id = int(request.POST.get('file_id', ''))
         linenum = int(request.POST.get('linenum', ''))
         if int(file_id) > 0 and content:
@@ -204,7 +212,6 @@ class AddAnnotationView(View):
                     annotation.project_id = file.project_id
                     annotation.content = content
                     annotation.user = request.user
-                    # annotation.user_id = 1
                     annotation.save()
                     return HttpResponse('{"status":"success","msg":"注释成功"}', content_type='application/json')
                 except Exception as e:
@@ -337,11 +344,9 @@ class AddCommentView(View):
     def post(self, request):
         if not request.user.is_authenticated:
             return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
-        # print(11111)
         content = request.POST.get('content', '')
         type = request.POST.get('type', '')        
         object_id = int(request.POST.get('object_id', ''))
-        print(content,type,object_id)
 
         if object_id > 0 and content:
             try:
@@ -466,63 +471,67 @@ class AnswerQuestionIssueView(View):
         else:
             return HttpResponse('{"status":"fail","msg":"回答失败，请重新回答"}', content_type='application/json')
 
+"""
+    现在的策略是:如果存在了,再此点击就是取消点赞了,同时允许踩
+"""
 
 class AddVoteView(View):
     def post(self, request):
-        type = request.POST.get('type', 0)
-        object_id = int(request.POST.get('object_id', ''))
-        vote_value = request.POST.get('vote_value', 0)
         # if not request.user.is_authenticated():
         #     return HttpResponse(json.dumps({"status": "fail", "msg": "用户未登录"}), content_type='application/json')
-        exist_records = Vote.objects.filter(user=request.user, vote_type_id=object_id, vote_type=type)
-        # exist_records = Vote.objects.filter(user_id=1, vote_type_id=object_id, vote_type=type)
+        
+        vote_type = request.POST.get('vote_type', 0)
+        object_id = int(request.POST.get('object_id', ''))
+        vote_value = request.POST.get('vote_value', 0)
         try:
-            if type == 'question':
+            if vote_type == 'question':
                 object = Question.objects.get(id=object_id)
-            elif type == 'answer':
+            elif vote_type == 'answer':
                 object = Answer.objects.get(id=object_id)
-            elif type == 'article':
+            elif vote_type == 'article':
                 object = Article.objects.get(id=object_id)
-            elif type == 'annotation':
+            elif vote_type == 'annotation':
                 object = Annotation.objects.get(id=object_id)
-            elif type == 'issue':
+            elif vote_type == 'issue':
                 object = Issue.objects.get(id=object_id)
-            elif type == 'issue_answer':
+            elif vote_type == 'issue_answer':
                 object = IssueComment.objects.get(id=object_id)
-            elif type == 'question_comment':
+            elif vote_type == 'question_comment':
                 object = QuestionComment.objects.get(id=object_id)
-            elif type == 'answer_comment':
+            elif vote_type == 'answer_comment':
                 object = AnswerComment.objects.get(id=object_id)
-            elif type == 'article_comment':
+            elif vote_type == 'article_comment':
                 object = ArticleComment.objects.get(id=object_id)
-            elif type == 'annotation_comment':
+            elif vote_type == 'annotation_comment':
                 object = AnnotationComment.objects.get(id=object_id)
-            elif type == 'file':
+            elif vote_type == 'file':
                 object = File.objects.get(id=object_id)
             else:
-                return HttpResponse('{"status":"fail","msg":"类型传递错误"}', content_type='application/json')
+                return HttpResponse('{"status":"fail","msg":"类型传递错误"}', content_type='application/json')      
         except Exception as e:
             return HttpResponse('{"status":"fail","msg":"参数传递错误"}', content_type='application/json')
+        
+        exist_records = Vote.objects.filter(user=request.user, vote_type_id=object_id, vote_type=vote_type)
         if exist_records:
-            exist_records.delete()
-            object.vote -= 1
+            vote_before = exist_records[0].value
+            object.vote -= vote_before
             object.save()
-            return HttpResponse('{"status":"success", "info":"cancel","value":"-1","msg": "取消成功"}',
+            exist_records.delete()
+            return HttpResponse(json.dumps({"status": "success", "info": "cancel", "value": -(vote_before), "msg": "取消成功"}),
                                 content_type='application/json')
-        else:
-            vote = Vote()
-            if object_id > 0 and type is not '':
-                vote.user = request.user
 
-                vote.vote_type = type
-                vote.vote_type_id = object_id
-                vote.value = vote_value
-                vote.save()
-                object.vote += 1
-                object.save()
-                return HttpResponse('{"status":"success","value":"1","msg":"点赞成功"}', content_type='application/json')
-            else:
-                return HttpResponse('{"status":"fail","msg":"参数传递错误"}', content_type='application/json')
+        vote = Vote()
+        if object_id > 0 and vote_type is not '':
+            vote.user = request.user
+            vote.vote_type = vote_type
+            vote.vote_type_id = object_id
+            vote.value = vote_value
+            vote.save()
+            object.vote += int(vote_value)
+            object.save()
+            return HttpResponse(json.dumps({"status": "success", "msg": "点赞成功", "value": int(vote_value)}), content_type='application/json')
+        else:
+            return HttpResponse('{"status":"fail","msg":"参数传递错误"}', content_type='application/json')
 
 
 class AcceptAnswerView(View):
@@ -595,9 +604,9 @@ class GetHotestIssuesView(View):
                 if issues_origin[i].pk not in issue_answernum:
                     issues.append(issues_origin[i])
                     count += 1
-        # print(issues)
+
         html_str = render_to_string('projects/filesub/hotest_issue.html', {'issues': issues})
-        # print(html_str)
+
         return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
 
 # Backup
@@ -637,7 +646,6 @@ class GetHotestIssuesView(View):
 #         if len(issues)>num:
 #             issues = issues[0:num]
 #         html_str = render_to_string('projects/filesub/hotest_issue.html', {'issues':issues})
-#         print(html_str)
 #         return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
 
 
@@ -645,13 +653,15 @@ class Get_CodeReading_Content_View(View):
     def post(self,request):
         project_id = request.POST.get("project_id")
         path = request.POST.get("path")
-        print(path)
+
+        if path=="":
+            html_str = get_project_info(project_id)
+            return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
         # 根据path确定它是不是文件
         # (目前的判断方法是查看File_Anno_Issue_Summary表中是否有parentDir为传入的path,如果有说明是文件夹)
         isDir = (len(FileAnnoIssueSummary.objects.filter(project_id=project_id,parent_path=path))>0)
         if isDir:
             html_str = get_dir_info(project_id,path)
-            # print(html_str)
         else:
             html_str = get_code(project_id,path)
         return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
@@ -675,11 +685,9 @@ def get_code(project_id,path):
     questions_count = {}
     for i in questions:
         questions_count[str(i['linenum'])] = i['nums']
-    print(questions_count)
 
     html_str = render_to_string('projects/filesub/code-reading.html', locals())
     return html_str
-    # print(html_str)
 
 
 def choose_issue(file, issue_type=1, issue_info=1):
@@ -701,17 +709,57 @@ def choose_issue(file, issue_type=1, issue_info=1):
     return issues
 
 def get_project_info(project_id):
-    # 总注释数目
-    # anno_sum = len(Annotation.objects.filter(project_id=project_id))
-    # issue_sum = len(Issue.objects.filter(project_id=project_id))
-    # question_sum = len(Question.objects.filter(project_id=project_id))
-    pass
+    file_id = File.objects.get(project_id=project_id, path="").pk
 
+    # 总注释数目
+    annos = Annotation.objects.filter(project_id=project_id)
+    anno_sum = len(annos)
+    issue_sum = len(Issue.objects.filter(project_id=project_id))
+    question_sum = len(Question.objects.filter(project_id=project_id))
+    # 参与用户数
+    usersum = len(annos.values('user_id').annotate(user_num=Count('user_id')))
+    anno_filenum = len(annos.values(
+        'file_id').annotate(file_num=Count('file_id')))
+    anno_issue_summarys = FileAnnoIssueSummary.objects.filter(
+        project_id=project_id, parent_path="")
+
+    #当前文件夹下所有的file_ids以及fileid与filename的映射
+    file_ids = []
+    fileid_name_anno_issue = {}
+    for summary in anno_issue_summarys:
+        file_ids.append(summary.file_id)
+        fileid_name_anno_issue[summary.file_id] = [summary.file.name, 0, 0]
+
+    annos = Annotation.objects.filter(file_id__in=file_ids)
+    fileid_annonum = annos.values(
+        'file_id').annotate(anno_num=Count('file_id'))
+    fileid_issuenum = Issue.objects.filter(file_id__in=file_ids).values(
+        'file_id').annotate(issue_num=Count('file_id'))
+    fileid_questionnum = Question.objects.filter(file_id__in=file_ids).values(
+        'file_id').annotate(question_num=Count('file_id'))
+
+
+    for i in range(len(fileid_annonum)):
+        file_id = fileid_annonum[i]['file_id']
+        anno_num = fileid_annonum[i]['anno_num']
+        fileid_name_anno_issue[file_id][1] = anno_num
+
+    for i in range(len(fileid_issuenum)):
+        file_id = fileid_issuenum[i]['file_id']
+        issue_num = fileid_issuenum[i]['issue_num']
+        fileid_name_anno_issue[file_id][2] = issue_num
+
+    anno_num = len(Annotation.objects.filter(file_id=file_id))
+    question_num = len(Question.objects.filter(file_id=file_id))
+
+    html_str = render_to_string('projects/filesub/dir_info.html', locals())
+    return html_str
 
 
 def get_dir_info(project_id,path):
     # 获取当前文件的注释总数以及问题总数
     # 不需要累计的,只需要当前的即可了
+    file_id = File.objects.get(project_id=project_id,path=path).pk
     anno_issue_summarys = FileAnnoIssueSummary.objects.filter(project_id=project_id,parent_path=path)
     
     #当前文件夹下所有的file_ids以及fileid与filename的映射
@@ -726,26 +774,28 @@ def get_dir_info(project_id,path):
     fileid_issuenum = Issue.objects.filter(file_id__in=file_ids).values('file_id').annotate(issue_num=Count('file_id'))
     fileid_questionnum = Question.objects.filter(file_id__in=file_ids).values('file_id').annotate(question_num=Count('file_id'))
     usersum = len(annos.values('user_id').annotate(user_num=Count('user_id')))
-    print("usernum:"+str(usersum))
 
     anno_sum,issue_sum,question_sum=0,0,0
     anno_filenum=0
 
     for i in range(len(fileid_annonum)):
         anno_filenum +=1
-        file_id = fileid_annonum[i]['file_id']
+        current_file_id = fileid_annonum[i]['file_id']
         anno_num = fileid_annonum[i]['anno_num']
         anno_sum+= anno_num
-        fileid_name_anno_issue[file_id][1]=anno_num
+        fileid_name_anno_issue[current_file_id][1] = anno_num
 
     for i in range(len(fileid_issuenum)):
-        file_id = fileid_issuenum[i]['file_id']
+        current_file_id = fileid_issuenum[i]['file_id']
         issue_num = fileid_issuenum[i]['issue_num']
         issue_sum += issue_num
-        fileid_name_anno_issue[file_id][2]=issue_num
+        fileid_name_anno_issue[current_file_id][2] = issue_num
 
     for i in range(len(fileid_questionnum)):
         question_sum += fileid_questionnum[i]['question_num']
+
+    anno_num = len(Annotation.objects.filter(file_id=file_id))
+    question_num = len(Question.objects.filter(file_id=file_id))
 
     html_str = render_to_string('projects/filesub/dir_info.html', locals())
     return html_str
@@ -759,3 +809,28 @@ def getAnnotationByFileId():
 
 def getQuestionByFileId():
     pass
+
+
+class GetAddtabParasView(View):
+    def post(self, request):
+        url = request.POST.get('url','')
+        index = url.find("projects/")
+        # 获取projects/后面的字符串
+        url = url[index+len("projects/"):]
+
+        index1 = url.find("/")
+
+        projectName = url[0:index1]
+        index = url.rfind("/")
+        if url.endswith("/"):
+            path = url[index1:-1]
+            if path=="":
+                filename="rootDir"
+            else:
+                filename = url[index+1:-1]     
+        else:
+            path = url[index1:]
+            filename = url[index+1:]
+
+        project_id = Project.objects.get(name=projectName).pk
+        return HttpResponse(json.dumps({"status": "success", "project_id": project_id,"path":path,"filename":filename}), content_type='application/json')

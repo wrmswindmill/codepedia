@@ -28,23 +28,9 @@
             {% endif %}
         </span>
 
-        <span id="addanno_{{fileid}}_{{ linenum }}" class="addanno" style="visibility: hidden;">
+        <span id="addanno_{{fileid}}_{{ linenum }}" class="addanno" style="visibility: hidden;" onclick="inject_addnoPanel_html(this,{{fileid}},{{linenum}})">
             <i class="fa fa-plus-circle color-grey-c"></i>
         </span>
-
-        <div class="addno-panel" >
-            <div class="trangle-op"></div>
-            <div class="put-content">
-                <p class="put-select clearfix" id="addno-select-{{linenum}}">
-                    <span class="active" onclick='$(this).siblings("span").removeClass("active"); $(this).addClass("active");'>注释</span>
-                    <span onclick='$(this).siblings("span").removeClass("active"); $(this).addClass("active");'>问题</span>
-                </p>
-                
-                <textarea id="addno-text-{{fileid}}-{{ linenum }}" class="put-text" placeholder="输入注释或者问题"> </textarea>
-                <a href="#" onclick="add_annotation(this,{{ file.id }},{{ linenum }})" class="submit fr" id="submit">提交</a>
-            </div>
-        </div>
-
     </div>
 
 </div>

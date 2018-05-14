@@ -448,7 +448,7 @@ a:hover {
 }
 
 .middle-right {
-    padding: 20px;
+    padding: 30px;
     box-sizing: border-box;
     max-width: 370px;
 }
@@ -639,6 +639,7 @@ a:hover {
 .responsePanel {
     padding: 10px 20px;
 }
+
 .responseInput {
     border: 1px solid #eee;
     height: 35px;

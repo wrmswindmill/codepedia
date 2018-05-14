@@ -4,12 +4,28 @@
         <p class="fr">
             <span class="fl mr15 mt7">
                 <img src="/static/image/annotation.png" class="mr3">
-                <span class="font-12">{{anno_num}}</span>
+                <span class="font-12" id="dir_anno_{{file_id}}">{{anno_num}}</span>
             </span>
-            <span class="fl mt7">
+            <span class="fl mr15 mt7">
                 <img src="/static/image/question.png" class="mr3">
-                <span class="font-12">{{issue_num}}</span>
+                <span class="font-12" id="dir_question_{{file_id}}">{{question_num}}</span>
             </span>
+            
+            <span class="fl mt7" onclick="show_next_addnoPanel({{file_id}})">
+                <i class="fa fa-plus-circle color-grey-c"></i>
+            </span>
+
+            <div class="addno-panel" id="addno-panel-{{file_id}}" style="top: 200px">
+                <div class="trangle-op"></div>
+                <div class="put-content">
+                    <p class="put-select clearfix" id="addno-select-0">
+                        <span class="active" onclick='$(this).siblings("span").removeClass("active"); $(this).addClass("active");'>注释</span>
+                        <span onclick='$(this).siblings("span").removeClass("active"); $(this).addClass("active");'>问题</span>
+                    </p>
+                    <textarea id="addno-text-{{file_id}}-0" class="put-text" placeholder="输入注释或者问题"> </textarea>
+                    <a href="#" onclick="add_dir_annotation(this,{{file_id}},0)" class="submit fr" id="submit">提交</a>
+                </div>
+            </div>
         </p>
     </div>
     <div class="filePathInfo">

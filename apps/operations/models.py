@@ -283,6 +283,17 @@ class Vote(models.Model):
         verbose_name_plural = verbose_name
 
 
+class AnnotationStrategy(models.Model):
+    CHOICE = [
+        (0, 'get_all_annotation'),
+        (1, 'get_user_annotation')
+    ]
+    project = models.ForeignKey(Project, verbose_name=u"项目",
+                             on_delete=models.CASCADE)
+    choice = models.IntegerField(
+        choices=CHOICE, default=0, verbose_name='策略')
 
-
-
+    class Meta:
+        db_table = 'AnnotationStrategy'
+        verbose_name = u"注释策略"
+        verbose_name_plural = verbose_name

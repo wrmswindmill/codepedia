@@ -18,7 +18,7 @@ from django.urls import path
 from .views import ShowIssueQuestionView, ShowAnnotationView, ShowNavigationView
 from .views import AddAnnotationView, AddArticleView, AddQuestionView, AddIssueAnswerView, AddCommentView
 from .views import UpdateAnnotationView, UpdateArticleView, UpdateQuestionView, UpdateAnswerView, UpdateCommentView
-from .views import AddVoteView, AcceptAnswerView, ShowMethodInfo, GetHotestIssuesView, Get_CodeReading_Content_View, AddQuestionAnswerView
+from .views import AddVoteView, AcceptAnswerView, ShowMethodInfo, GetHotestIssuesView, Get_CodeReading_Content_View, AddQuestionAnswerView, GetAddtabParasView
 
 app_name = "operations"
 urlpatterns = [
@@ -40,5 +40,7 @@ urlpatterns = [
     path('show_method_info/', ShowMethodInfo.as_view(), name='show_method_info'),
     path('get_hotest_issues/', GetHotestIssuesView.as_view(),name='get_hotest_issues'),
     path('get_codereading_content/', Get_CodeReading_Content_View.as_view(),name='get_codereading_content'),
-    path('add_question_answer/',AddQuestionAnswerView.as_view(), name='add_question_answer/')
+    path('add_question_answer/',AddQuestionAnswerView.as_view(), name='add_question_answer/'),
+    path('get_addtab_paras/', GetAddtabParasView.as_view(),
+         name='get_addtab_paras/')
 ]

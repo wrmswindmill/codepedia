@@ -29,26 +29,26 @@ class CustomBackend(ModelBackend): #通过邮箱登陆
             return None
 
 
-class LoginView(View):
-    def get(self, request):
-        return render(request, 'users/login.html', {})
+# class LoginView(View):
+#     def get(self, request):
+#         return render(request, 'users/login.html', {})
 
-    def post(self, request):
-        login_form = LoginForm(request.POST)
-        if login_form.is_valid():
-            user_name = request.POST.get('username', '')
-            pass_word = request.POST.get('password', '')
-            user = authenticate(username=user_name, password=pass_word)
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return HttpResponseRedirect(reverse('index'))
-                else:
-                    return render(request, 'users/login.html', {'msg': '用户未激活!请到邮箱激活后,再登录'})
-            else:
-                return render(request, 'users/login.html', {'msg': '用户名或密码错误!'})
-        else:
-            return render(request, 'users/login.html', {'login_form': login_form})
+#     def post(self, request):
+#         login_form = LoginForm(request.POST)
+#         if login_form.is_valid():
+#             user_name = request.POST.get('username', '')
+#             pass_word = request.POST.get('password', '')
+#             user = authenticate(username=user_name, password=pass_word)
+#             if user is not None:
+#                 if user.is_active:
+#                     login(request, user)
+#                     return HttpResponseRedirect(reverse('index'))
+#                 else:
+#                     return render(request, 'users/login.html', {'msg': '用户未激活!请到邮箱激活后,再登录'})
+#             else:
+#                 return render(request, 'users/login.html', {'msg': '用户名或密码错误!'})
+#         else:
+#             return render(request, 'users/login.html', {'login_form': login_form})
 
 class RegisterView(View):
 
@@ -83,8 +83,7 @@ class RegisterView(View):
 
             from .tasks import send_type_email
             send_type_email(user_name,'register')
-            # send_type_email.delay(user_name, 'register')
-            
+            # send_type_email.delay(user_name, 'register')            
             return render(request, 'users/login.html')
         else:
             return render(request, 'users/register.html', {'register_form': register_form})
@@ -92,7 +91,6 @@ class RegisterView(View):
 #用户激活
 class ActiveView(View):
     def get(self, request, active_code):
-        print(1111)
         all_records = EmailVerifyRecord.objects.filter(code=active_code)
         if all_records:
             for record in all_records:
@@ -124,45 +122,58 @@ class UserInfoView(View):
 
 
 # 用户登录
-# class LoginView(View):
-#     def get(self, request):
-#         return render(request, 'users/login.html', {})
-#
-#     def post(self, request):
-#         login_form = LoginForm(request.POST)
-#         if login_form.is_valid():
-#             user_name = request.POST.get('username', '')
-#             pass_word = request.POST.get('password', '')
-#             user_params = {'username':user_name,'password':pass_word}
-#             trustie_url = 'https://www.trustie.net/account/codepedia_login'
-#             response = requests.get(trustie_url, params=user_params)
-#             response = json.loads(response.text)
-#             status = response['status']
-#             if status == 1:
-#                 user_message = response['user']['user']
-#                 email = user_message['mail']
-#                 exist_records = User.objects.filter(email=email).first()
-#                 if not exist_records:
-#                     user = User()
-#                     user.username = user_name
-#                     user.password = make_password(pass_word)
-#                     user.email = email
-#                     if 'lastname' in user_message:
-#                         user.nick_name = user_message['lastname']
-#                     elif 'nickname' in user_message:
-#                         user.nick_name = user_message['nickname']
-#                     else:
-#                         user.nick_name = user_message['firstname']
-#                     user.is_active = True
-#                     user.save()
-#                 user = authenticate(username=user_name, password=pass_word)
-#                 if user is not None:
-#                     login(request, user)
-#                     return HttpResponseRedirect(reverse('index'))
-#             else:
-#                 return render(request, 'users/login.html', {'msg': '用户名或密码错误!'})
-#         else:
-#             return render(request, 'users/login.html', {'login_form': login_form})
+class LoginView(View):
+    def get(self, request):
+        return render(request, 'users/login.html', {})
+
+    def post(self, request):
+        login_form = LoginForm(request.POST)
+        if login_form.is_valid():
+            user_name = request.POST.get('username', '')
+            pass_word = request.POST.get('password', '')
+            user = authenticate(username=user_name, password=pass_word)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return HttpResponseRedirect(reverse('index'))
+                else:
+                    return render(request, 'users/login.html', {'msg': '用户未激活!请到邮箱激活后,再登录'})        
+            else:
+                user_params = {'username': user_name, 'password': pass_word}
+                trustie_url = 'https://www.trustie.net/account/codepedia_login'
+                response = requests.get(trustie_url, params=user_params)
+                response = json.loads(response.text)
+                status = response['status']
+                if status == 1:
+                    user_message = response['user']['user']
+                    email = user_message['mail']
+                    exist_records = User.objects.filter(email=email).first()
+                    if not exist_records:
+                        user = User()
+                        user.username = user_name
+                        user.password = make_password(pass_word)
+                        user.email = email
+                        if 'lastname' in user_message:
+                            user.nick_name = user_message['lastname']
+                        elif 'nickname' in user_message:
+                            user.nick_name = user_message['nickname']
+                        else:
+                            user.nick_name = user_message['firstname']
+                        user.is_active = True
+                        user.save()
+                    user = authenticate(username=user_name, password=pass_word)
+                    if user is not None:
+                        login(request, user)
+                        return HttpResponseRedirect(reverse('index'))
+                    else:
+                        return render(request, 'users/login.html', {'msg': '用户名或密码错误!'})
+                else:
+                    return render(request, 'users/login.html', {'msg': '用户名或密码错误!'})
+        else:
+            return render(request, 'users/login.html', {'login_form': login_form})
+
+
+        # 
 
 class IndexView(View):
     def get(self,request):
@@ -181,6 +192,7 @@ class IndexView(View):
             page = 1
         p = Paginator(all_files, 10,  request=request)
         files = p.page(page)
+        
 
         return render(request, 'projects/file-list.html', {
             'all_files': files,
