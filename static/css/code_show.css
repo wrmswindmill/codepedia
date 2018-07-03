@@ -194,7 +194,7 @@ a:hover {
 }
 
 .head {
-    background-color: #006898;
+    background-color: #3C3F41;
     height: 56px;
 }
 
@@ -226,9 +226,9 @@ a:hover {
 }
 
 .left-tab {
-    width: 70px;
+    width: 50px;
     text-align: center;
-    background: #21323D;
+    background: #3C3F41;
     padding: 0px;
     padding-left: 3px;
     box-sizing: border-box;
@@ -258,7 +258,7 @@ a:hover {
 }
 
 .left-tab li.active {
-    background: #32A5D5;
+    background: #4f5253;
 }
 
 .left-tab li span {
@@ -271,7 +271,7 @@ a:hover {
     position: absolute;
     top: 0px;
     width: 100%;
-    padding-left: 70px;
+    padding-left: 50px;
     box-sizing: border-box;
     height: 100%;
     z-index: 1;
@@ -289,7 +289,7 @@ a:hover {
 #filelist-content {
     width: 100%;
     box-sizing: border-box;
-    padding: 10px;
+    padding-top:20px; 
     padding-left: 0px;
     height: 100%;
     overflow-y: auto;
@@ -430,11 +430,12 @@ a:hover {
 
 .linenum {
     float: left;
-    width: 40px;
-    background: #f1efec;
-    text-align: center;
+    width: 25px;
+    background: white;
+    text-align: right;
     padding: 0 2px 0 2px;
-    height: 20px;
+    color: #25282C;
+    /* height: 20px; */
     line-height: 20px;
     font-size: 13px;
 }
@@ -449,7 +450,7 @@ a:hover {
 }
 
 .middle-right {
-    width: 20%;
+    width: 25%;
     margin-top: 10px;
     padding: 30px;
     box-sizing: border-box;
@@ -1171,7 +1172,7 @@ pre.prettyprint {
 /* tab */
 
 .tab_head {
-    background-color: #CBCBCB;
+    background-color: #3C3F41;
     width: 100%;
 }
 
@@ -1184,11 +1185,15 @@ pre.prettyprint {
 }
 
 .tab_item.active a:first-child {
-    color: #0c6e97!important;
+    color: #C9C9C9!important;
 }
 
 .tab_item:hover {
-    background-color: #ccc
+    background-color: #515658;
+}
+
+.tab_item.active{
+    background-color: #515658;
 }
 
 .tab_item:after {
@@ -1198,13 +1203,13 @@ pre.prettyprint {
     right: 1px;
     width: 1px;
     height: 20px;
-    background-color: #EAEAEA;
+    background-color: #515658;
     bottom: 4px;
 }
 
 .tab_item a {
     text-decoration: none;
-    color: #333!important;
+    color: #C9C9C9!important;
     float: left;
 }
 

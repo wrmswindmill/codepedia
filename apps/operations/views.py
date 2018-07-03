@@ -664,6 +664,7 @@ class Get_CodeReading_Content_View(View):
             html_str = get_dir_info(project_id,path)
         else:
             html_str = get_code(project_id,path)
+            html_str = html_str.replace('style="background-color: white;"',"")
         return HttpResponse(json.dumps({"status": "success", "html_str": html_str}), content_type='application/json')
 
 def get_code(project_id,path):

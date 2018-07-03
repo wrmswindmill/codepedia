@@ -396,13 +396,13 @@ function show_navigation() {
 }
 
 function show_currentLine(linenum) {
-    document.getElementById("code_" + linenum).style.backgroundColor = '#f1efec';
-    document.getElementById("addanno_" + linenum).style.visibility = 'visible';
+    // document.getElementById("code_" + linenum).style.backgroundColor = '#f1efec';
+    // document.getElementById("addanno_" + linenum).style.visibility = 'visible';
 }
 
 function hide_currentLine(linenum) {
-    document.getElementById("code_" + linenum).style.backgroundColor = 'white';
-    document.getElementById("addanno_" + linenum).style.visibility = 'hidden';
+    // document.getElementById("code_" + linenum).style.backgroundColor = 'white';
+    // document.getElementById("addanno_" + linenum).style.visibility = 'hidden';
 }
 
 $(function () {
@@ -640,6 +640,7 @@ function add_tab(project_id,path,filename) {
                 if (data.status === 'success') {
                     // 获取code-reading的内容，并填充到对应的code-reading的Element
                     var content = data.html_str
+                    // console.log(content);
                     div_codereading.innerHTML = content;
                 }
                 else {
