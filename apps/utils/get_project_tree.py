@@ -22,14 +22,14 @@ def getHtml(projectPath):
 
         if os.path.isdir(filePath):
             tag_html = '<li class = "parent-item">\n'
-            tag_html += '<a href = "javascript:void(0)" onclick=add_tab("%s","/%s","/%s") class = "item" show = "0" ><i class = "fa fa-folder color-blue"></i> %s </a>\n' % (
+            tag_html += '<a href = "javascript:void(0)" ondblclick=add_tab("%s","/%s","/%s") class = "item" show = "0" ><i class = "fa fa-folder color-blue"></i> %s </a>\n' % (
                 project_id,files[i], files[i], files[i])
             tag_html += getInnerHtml(projectPath, filePath)
             tag_html += '</li>\n'
         else:
             # 叶子节点，替换成绝对路径
             url = url_head+"/"+project_name+"/"+files[i]
-            tag_html = '<li><a href="javascript:void(0)" onclick=add_tab("%s","/%s","/%s") class = "item"><i class = "fa fa-file-text-o color-blue"></i >  %s </a></li>\n' % (
+            tag_html = '<li><a href="javascript:void(0)" ondblclick=add_tab("%s","/%s","/%s") class = "item"><i class = "fa fa-file-text-o color-blue"></i >  %s </a></li>\n' % (
                 project_id,files[i], files[i], files[i])
 
         html_str += tag_html
@@ -66,10 +66,10 @@ def getInnerHtml(projectPath, path):
             tag_html = '<li>\n'
             # 如果有多级层叠的情况
             if flag:
-                tag_html += '<a href = "javascript:void(0)" onclick=add_tab("%s","%s","/%s") class = "item" show = "0" ><i class = "fa fa-folder color-blue"></i> %s </a>\n' % (
+                tag_html += '<a href = "javascript:void(0)" ondblclick=add_tab("%s","%s","/%s") class = "item" show = "0" ><i class = "fa fa-folder color-blue"></i> %s </a>\n' % (
                     project_id,relative_path, files[i], path.replace(path_before, '')+"/"+files[i])
             else:
-                tag_html += '<a href = "javascript:void(0)" onclick=add_tab("%s","%s","/%s") class = "item" show = "0" ><i class = "fa fa-folder color-blue"></i> %s </a>\n' % (
+                tag_html += '<a href = "javascript:void(0)" ondblclick=add_tab("%s","%s","/%s") class = "item" show = "0" ><i class = "fa fa-folder color-blue"></i> %s </a>\n' % (
                     project_id,relative_path, files[i], files[i])
             tag_html += getInnerHtml(projectPath, filePath)
             tag_html += '</li>\n'
@@ -79,7 +79,7 @@ def getInnerHtml(projectPath, path):
             # url = url_head+"/"+path[index:]+"/"+files[i]
             # tag_html = '<li><a href="%s"><i class = "fa fa-file-text-o color-blue"></i > %s </a></li>\n' % (
             #     url, files[i])
-            tag_html = '<li><a href="javascript:void(0)" onclick=add_tab("%s","%s","%s")><i class = "fa fa-file-text-o color-blue"></i > %s </a></li>\n' % (
+            tag_html = '<li><a href="javascript:void(0)" ondblclick=add_tab("%s","%s","%s")><i class = "fa fa-file-text-o color-blue"></i > %s </a></li>\n' % (
                 project_id,relative_path, files[i], files[i])
         html_str += tag_html
     html_str += '</ul>\n'

@@ -118,7 +118,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'codepedia',
         'USER': 'root',
-        'PASSWORD': 'root123',
+        'PASSWORD': 'codepedia123',
         'HOST': '127.0.0.1'
     }
 }
