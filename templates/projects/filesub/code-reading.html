@@ -4,13 +4,9 @@
 {% for linenum,line in lines.items %}
 <div id="{{fileid}}_L{{ linenum }}" class="codeline" onmouseover='show_currentLine("{{fileid}}_{{linenum}}")' onmouseout='hide_currentLine("{{fileid}}_{{linenum}}")'>
     <div id="linenum_{{ linenum  }}" class="linenum">{{ linenum }}</div>
-
+    
     <div id="code_{{fileid}}_{{ linenum }}" class="sourcecode">
-        <pre>
-            <code class="java">
-                {{ line|safe }}
-            </code>
-        </pre>
+        <pre class="prettyprint">{{ line|safe }}</pre>
     </div>
 
     <div id="linestatus_{{ linenum }}" class="linestatus">

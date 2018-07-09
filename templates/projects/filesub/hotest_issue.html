@@ -1,7 +1,7 @@
-<h4>Hot Question</h4>
+<p class="right-item-title"> Hot Question</p>
 {% for issue in issues%}
 <li class="hot-qus clearfix">
-    <a href="javascript:void(0)" onclick='show_issue("{{issue.pk}}")'>{{issue.content}}</a>
+    <a href="javascript:void(0)" onclick='show_issue("{{issue.pk}}")' style="color:#EBEBEB;">{{issue.content}}</a>
     <span>1</span>
 </li>
 {% endfor %}

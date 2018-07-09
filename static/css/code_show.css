@@ -190,12 +190,12 @@ a:hover {
     position: absolute;
     width: 100%;
     bottom: 0px;
-    top: 56px;
+    top: 45px;
 }
 
 .head {
-    background-color: #3C3F41;
-    height: 56px;
+    background-color: #171819;
+    height: 45px;
 }
 
 .filename {
@@ -220,7 +220,7 @@ a:hover {
     overflow-y: auto;
     -webkit-box-flex: 1;
     display: flex;
-    background: #374e5d;
+    background: #313335;
     position: relative;
     overflow: hidden;
 }
@@ -228,7 +228,7 @@ a:hover {
 .left-tab {
     width: 50px;
     text-align: center;
-    background: #3C3F41;
+    background: #171819;
     padding: 0px;
     padding-left: 3px;
     box-sizing: border-box;
@@ -249,7 +249,7 @@ a:hover {
     list-style: none;
     padding: 0px;
     font-size: 12px;
-    color: #fff;
+    color: #CCCCCC;
     cursor: pointer;
 }
 
@@ -258,7 +258,7 @@ a:hover {
 }
 
 .left-tab li.active {
-    background: #4f5253;
+    background: #4E5053;
 }
 
 .left-tab li span {
@@ -278,18 +278,17 @@ a:hover {
 }
 
 .tab-title {
-    height: 60px;
-    line-height: 60px;
-    padding: 0px 15px;
+    height: 40px;
+    line-height: 40px;
+    padding-left: 20px;
     box-sizing: border-box;
-    background: #2e4452;
-    color: #fff;
+    background: #2A2C2E;
+    color: #CCCCCC;
 }
 
 #filelist-content {
     width: 100%;
     box-sizing: border-box;
-    padding-top:20px; 
     padding-left: 0px;
     height: 100%;
     overflow-y: auto;
@@ -454,13 +453,30 @@ a:hover {
     margin-top: 10px;
     padding: 30px;
     box-sizing: border-box;
+    background-color: #313335;
     /* max-width: 370px; */
 }
 
 .middle-right-item {
-    background-color: #fff;
+    border: 1px solid #979797 ;
+    background-color: #313335;
     padding: 15px 10px;
     margin-bottom: 15px;
+}
+
+.right-item-title{
+    font-size: 15px;
+    color: #FEFEFE;
+    margin-top: -5px;
+    margin-bottom: 5px;
+}
+
+.right-description{
+    display: block;
+    float: left;
+    text-align: left;
+    color: #C3BDBD;
+    font-size: 13px;
 }
 
 .middle-right-item p {
@@ -470,12 +486,15 @@ a:hover {
 .panel-left {
     display: block;
     float: left;
-    width: 80px;
+    width: 60px;
     text-align: left;
-    color: #989898;
+    color: #C3BDBD;
+    font-size: 13px;
 }
 
 .panel-right {
+    color: #EBEBEB;
+    font-size:13px;
     display: block;
     float: left;
     flex: 1;
@@ -488,18 +507,19 @@ a:hover {
 
 .des {
     margin-top: 15px;
+    padding-top: 10px; 
 }
 
 .des span {
     display: block;
     float: left;
     padding: 0px 4px;
-    background-color: #E5F6FF;
+    background-color: rgba(180, 180, 180, .43);
     border-radius: 2px;
-    margin-right: 5px;
+    margin-right: 10px;
     height: 24px;
     line-height: 24px;
-    color: #68B7FF;
+    color: #C5BFBF;
     font-size: 12px;
 }
 
@@ -1042,7 +1062,7 @@ pre.prettyprint {
 }
 
 .tags {
-    margin-left: 30px;
+    margin-left: 20px;
 }
 
 .def {
@@ -1172,7 +1192,8 @@ pre.prettyprint {
 /* tab */
 
 .tab_head {
-    background-color: #3C3F41;
+    height: 40px;
+    background-color: #26292B;
     width: 100%;
 }
 
@@ -1182,18 +1203,19 @@ pre.prettyprint {
     font-size: 12px;
     list-style-type: none;
     position: relative;
+    height: 40px;
 }
 
 .tab_item.active a:first-child {
-    color: #C9C9C9!important;
+    color: #ffffff!important;
 }
 
 .tab_item:hover {
-    background-color: #515658;
+    background-color: #1E2022;
 }
 
 .tab_item.active{
-    background-color: #515658;
+    background-color: #1E2022;
 }
 
 .tab_item:after {
@@ -1202,14 +1224,15 @@ pre.prettyprint {
     top: auto;
     right: 1px;
     width: 1px;
-    height: 20px;
-    background-color: #515658;
+    height: 35px;
+    background-color: #000000;
     bottom: 4px;
 }
 
 .tab_item a {
     text-decoration: none;
-    color: #C9C9C9!important;
+    color: #969B91!important;
+    padding-top: 8px;
     float: left;
 }
 

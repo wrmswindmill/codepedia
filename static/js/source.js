@@ -396,13 +396,13 @@ function show_navigation() {
 }
 
 function show_currentLine(linenum) {
-    // document.getElementById("code_" + linenum).style.backgroundColor = '#f1efec';
-    // document.getElementById("addanno_" + linenum).style.visibility = 'visible';
+    document.getElementById("code_" + linenum).style.backgroundColor = '#f1efec';
+    document.getElementById("addanno_" + linenum).style.visibility = 'visible';
 }
 
 function hide_currentLine(linenum) {
-    // document.getElementById("code_" + linenum).style.backgroundColor = 'white';
-    // document.getElementById("addanno_" + linenum).style.visibility = 'hidden';
+    document.getElementById("code_" + linenum).style.backgroundColor = 'white';
+    document.getElementById("addanno_" + linenum).style.visibility = 'hidden';
 }
 
 $(function () {

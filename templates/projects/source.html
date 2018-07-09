@@ -10,12 +10,11 @@
     <link rel="stylesheet" type="text/css" href="{% static 'vendor/bootstrap/css/bootstrap1.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'vendor/qtip/jquery.qtip.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.css' %}">
-    <!-- <link rel="stylesheet" type="text/css" href="{% static 'css/prettify.css' %}"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css"> -->
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/prettify.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/code_show.css' %}">
 
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script> 
-    <script >hljs.initHighlightingOnLoad();</script>  
 
     <title>{{ project.name }}-{{ project.desc }}</title>
 
@@ -25,7 +24,7 @@
 <body id="codepanel">
     <!-- 要求与codepeida的保持一致 -->
     <div class="clearfix head">
-        <img src="/static/image/codepedia.png" style="margin:10px 0px 0px 10px">
+        <img src="/static/image/codepedia.png" style="margin:12px 0px 0px 10px;height: 20px">
         <!-- 要求与codepeida的保持一致 -->
         <ul class="nav navbar-nav navbar-right">
             {% if request.user.is_authenticated %} 
@@ -39,13 +38,14 @@
    
     <div id="search_response"></div>
 
-    <hr style="margin-top: 0px;margin-bottom: 0px;border-top: 2px solid #4B4B4B;" />
+    <!-- <hr style="margin-top: 0px;margin-bottom: 0px;border-top: 2px solid #4B4B4B;" /> -->
 
-
-    <div class="clearfix modify-all" style="margin-top: 2px;">
-        <div class="left" style="background-color: #434547;">
+    <div class="clearfix modify-all">
+    <!-- <div class="clearfix modify-all" style="margin-top: 2px;"> -->
+        <div class="left">
             <ul class="fl left-tab">
                 <li class="active">
+                    <!-- <i class="fa fa-file-code-o fa-lg" aria-hidden="true"></i> -->
                     <span>Project</span>
                 </li>
                 <li onclick="show_navigation(this)">
@@ -53,30 +53,30 @@
                 </li>
             </ul>
             <div class="fl left-rightlist" id="file-list">
-                <!-- <p class="tab-title clearfix">
+                <p class="tab-title clearfix">
                     <label class="fl" id="currentProjectName">
                         {{project.name}}
                     </label>
 
                     <font class="fr hideleft">
-                        <i class="fa fa-angle-double-left color-white font-18"></i>
+                        <i class="fa fa-angle-double-left color-white font-18" style="padding-right: 7px;"></i>
                     </font>
-                </p> -->
+                </p>
                 <div id="filelist-content">
                     {{ project_tree | safe }}
                 </div>
             </div>
             <div class="fl left-rightlist" style="display:none;">
-                <!-- <p class="tab-title clearfix">
+                <p class="tab-title clearfix">
                     <label class="fl">
                         {{project.name}}
                     </label>
                     
                     <font class="fr hideleft">
-                        <i class="fa fa-angle-double-left color-white font-18"></i>
+                        <i class="fa fa-angle-double-left color-white font-18" style="padding-right: 7px;"></i>
                     </font>
-                </p> -->
-                <div id="structure-context" style="padding-top: 20px;">
+                </p>
+                <div id="structure-context">
 
                 </div>
             </div>
@@ -99,7 +99,7 @@
             
 
             <!-- <div class="clearfix" style="display: flex;padding-top: 42px;"> -->
-                <div class="clearfix" style="display: flex;">
+                <div class="clearfix" style="display: flex;height: 100%;">
                 <div class="fl middle-area">
                     <div class="tab_head clearfix" style="position: fixed;z-index: 5;">
 
@@ -119,7 +119,7 @@
 
                 <div class="fl middle-right">
                     <div class="middle-right-item">
-                        <h4>Project Infomation</h4>
+                        <p class="right-item-title">Project Infomation</p>
                         <p class="clearfix">
                             <span class="panel-left">Created</span>
                             <span class="panel-right">2018年4月22日 11:19</span>
@@ -140,8 +140,8 @@
                     </div>
 
                     <div class="middle-right-item">
-                        <h4>Project Description</h4>
-                        <p class="color-grey-des">This method was deprecated in API level 23 as of JDK version 1.1</p>
+                        <p class="right-item-title">Project Description</p>
+                        <p class="right-description">This method was deprecated in API level 23 as of JDK version 1.1</p>
                         <div class="des clearfix">
                             <span>style</span>
                             <span>script</span>
